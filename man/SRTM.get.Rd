@@ -29,6 +29,9 @@ Bernhard Rabus, Michael Eineder, Achim Roth, Richard Bamler, The shuttle radar t
 \author{
 D. Yang
 }
+\seealso{
+\code{\link{SRTM.list}}, \code{\link{SRTM.read}}
+}
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{get}% use one of  RShowDoc("KEYWORDS")

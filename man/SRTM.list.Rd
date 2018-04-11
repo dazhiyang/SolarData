@@ -36,7 +36,7 @@ D. Yang
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{SRTM.get}}
+\code{\link{SRTM.get}}, \code{\link{SRTM.read}}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

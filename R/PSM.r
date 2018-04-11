@@ -23,7 +23,6 @@ PSM.get <- function(lon, lat, api_key, attributes, name, affiliation, year, leap
     cat("PSM3 file", output_file, "is written in folder '", directory, "'\n")
   }
 
-
 }
 
 
