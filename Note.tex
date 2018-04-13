@@ -1,0 +1,258 @@
+\documentclass[twocolumn]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Note},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+  \title{Note}
+  \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+  \author{}
+  \preauthor{}\postauthor{}
+  \date{}
+  \predate{}\postdate{}
+
+
+\begin{document}
+\maketitle
+
+\subsection{R Markdown}\label{r-markdown}
+
+This is an R Markdown document. Markdown is a simple formatting syntax
+for authoring HTML, PDF, and MS Word documents. For more details on
+using R Markdown see \url{http://rmarkdown.rstudio.com}.
+
+When you click the \textbf{Knit} button a document will be generated
+that includes both content as well as the output of any embedded R code
+chunks within the document. You can embed an R code chunk like this:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(SolarData)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Loading required package: ggplot2
+\end{verbatim}
+
+\begin{verbatim}
+## Loading required package: insol
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lon <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{100}\NormalTok{, }\OperatorTok{-}\DecValTok{100}\NormalTok{, }\DecValTok{0}\NormalTok{)}
+\NormalTok{lat <-}\KeywordTok{c}\NormalTok{(}\DecValTok{10}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{90}\NormalTok{)}
+\NormalTok{LT <-}\StringTok{ }\KeywordTok{LTF.get}\NormalTok{(lon, lat, }\DataTypeTok{directory =} \StringTok{"/Volumes/Macintosh Research/Completed works/Solar_Energy_2017c_Entropy/Data/Linke Turbidity"}\NormalTok{)}
+\NormalTok{LT}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##     (100, 10) (-100, 0) (0, 90)
+## Jan      3.50      3.55    1.90
+## Feb      3.60      3.95    1.90
+## Mar      4.15      4.00    1.90
+## Apr      4.45      3.80    2.00
+## May      4.50      3.50    2.00
+## Jun      4.55      3.65    2.05
+## Jul      4.60      3.35    2.10
+## Aug      4.70      3.30    2.10
+## Sep      4.65      3.80    2.00
+## Oct      4.40      3.75    1.95
+## Nov      3.95      3.60    1.90
+## Dec      3.90      3.55    1.90
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{#####################################################################}
+\NormalTok{#####################################################################}
+\CommentTok{# library(SolarData)}
+\CommentTok{# #California map information}
+\CommentTok{# California <- maps::map('state', region = 'california', }
+\CommentTok{#               fill = TRUE, plot = FALSE)}
+\CommentTok{# bd <- maptools::map2SpatialPolygons(California, IDs = 'california',}
+\CommentTok{#       proj4string=sp::CRS("+proj=longlat +datum=WGS84"))}
+\CommentTok{# bndary <- bd@polygons[[1]]@Polygons[[1]]@coords}
+\CommentTok{# bndary_plot <- data.frame(bndary)}
+\CommentTok{# names(bndary_plot) <- c("lon", "lat")}
+\CommentTok{# #generate the regular grid}
+\CommentTok{# res = 0.2}
+\CommentTok{# x1 <- seq(-124.02, -114.1, by = res)}
+\CommentTok{# y1 <- seq(42.05, 32.40, by = -res)}
+\CommentTok{# loc1 <- expand.grid(x1,y1) #regular grid}
+\CommentTok{# loc_reg <- loc1[which(sp::point.in.polygon(point.x = loc1[,1], }
+\CommentTok{#    point.y = loc1[,2], pol.x = bndary[,1], pol.y = bndary[,2])==1),]}
+\CommentTok{# #generate all points following original, i.e., most granular, grid}
+\CommentTok{# x2 <- seq(-124.02, -114.1, by = 0.04)}
+\CommentTok{# y2 <- seq(42.05, 32.40, by = -0.04)}
+\CommentTok{# loc2 <- expand.grid(x2,y2) #PSM3 grid}
+\CommentTok{# loc_irreg <- loc2[which(sp::point.in.polygon(point.x = loc2[,1], }
+\CommentTok{#    point.y = loc2[,2], pol.x = bndary[,1], pol.y = bndary[,2])==1),]}
+\CommentTok{# loc_irreg <- loc_irreg[sample(x = 1:nrow(loc_irreg), size = }
+\CommentTok{#              nrow(loc_reg), replace = FALSE),]}
+\CommentTok{# }
+\CommentTok{# #####################################################################}
+\CommentTok{# #plot}
+\CommentTok{# data_plot <- data.frame(lon = append(loc_reg[,1], loc_irreg[,1]), }
+\CommentTok{#                         lat = append(loc_reg[,2], loc_irreg[,2]), }
+\CommentTok{#                         group = c(rep('regular', nrow(loc_reg)), }
+\CommentTok{#                         rep('irregular', nrow(loc_irreg))))}
+\CommentTok{# p <- ggplot() + }
+\CommentTok{#      geom_point(data=data_plot,aes(x=lon,y=lat), size = 0.5)+}
+\CommentTok{#      geom_polygon(data=bndary_plot,aes(x=lon,y=lat), size = 0.5, }
+\CommentTok{#                   color = 'red', fill = NA)+}
+\CommentTok{#      facet_wrap(~group) +}
+\CommentTok{#      coord_fixed() +}
+\CommentTok{#      scale_x_continuous(limits=c(-124.5, -114), expand = c(0, 0)) +}
+\CommentTok{#      scale_y_continuous(limits=c(32, 42.5), expand = c(0, 0)) +}
+\CommentTok{#      xlab(expression(paste("Longitude [", degree, "]", sep = ""))) +}
+\CommentTok{#      ylab(expression(paste("Latitude [", degree, "]", sep = ""))) +}
+\CommentTok{#      theme_gray() +}
+\CommentTok{#      theme(plot.margin = unit(c(0.5,0.5,0,0), "lines"), }
+\CommentTok{#            panel.spacing = unit(0.1, "lines"), }
+\CommentTok{#            text = element_text(size = 7), }
+\CommentTok{#            legend.position = "none")  }
+\CommentTok{# options(repr.plot.width=7, repr.plot.height=3) #This is only for Jupyter, if you want to output in pdf, using the commented code below}
+\CommentTok{# p}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{#####################################################################}
+\CommentTok{#install.packages("devtools", repos = "http://cran.us.r-project.org")}
+\CommentTok{#library("devtools")}
+\CommentTok{#install_github("dazhiyang/SolarData")}
+\CommentTok{#library("SolarData") #load the package}
+\CommentTok{# get PSM data for two locations}
+\CommentTok{# loc <- matrix(c(42.05, 44, -124.02, -120), nrow = 2)}
+\CommentTok{# PSM.get(lat = loc[,1], lon = loc[,2],}
+\CommentTok{#        api_key = "FVltdchrxzBCHiSNF6M7R4ua6BFe4j81fbPp8dDP",}
+\CommentTok{#        attributes = "ghi,dhi,dni",}
+\CommentTok{#        name = "John+Smith", affiliation = "Some+Institute",}
+\CommentTok{#        year = "2016", leap_year = "true", interval = '30',}
+\CommentTok{#        utc = "false", reason_for_use = "research",}
+\CommentTok{#        email = "email@gmail.com", mailing_list = "false")}
+\CommentTok{# }
+\CommentTok{# setwd()}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Including Plots}\label{including-plots}
+
+Note that the \texttt{echo\ =\ FALSE} parameter was added to the code
+chunk to prevent printing of the R code that generated the plot.
+
+
+\end{document}

@@ -4,7 +4,7 @@
 PSM.get <- function(lon, lat, api_key, attributes, name, affiliation, year, leap_year, interval, utc, reason_for_use, email, mailing_list, directory = "data-raw")
 {
   if(length(lat)!=length(lon))
-    stop("'lat' and 'lon' must have the same length")
+    stop("'lon' and 'lat' must have the same length")
 
   if(nchar(year)>4)
     stop("NSRDB API only allows downloading one year at a time")
