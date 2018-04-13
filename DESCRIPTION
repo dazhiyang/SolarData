@@ -2,17 +2,20 @@ Package: SolarData
 Title: Work with freely available solar data
 Version: 0.1.0
 Imports: 
-  dplyr, 
   raster,
   httr,
   textreadr,
-  tiff
+  tiff,
+  fields,
+  geosphere,
+  lubridate
 Authors@R: person("Dazhi", "Yang", email = "yangdazhi.nus@gmail.com", role = c("aut", "cre"))
 Description: Download and manipulate some publicly available solar datasets.
 Depends: 
   R (>= 3.4.4), 
   ggplot2, 
-  insol
+  insol,
+  dplyr
 Suggests: 
 License: MIT + file LICENSE
 Encoding: UTF-8

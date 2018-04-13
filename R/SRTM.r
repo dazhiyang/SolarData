@@ -1,6 +1,8 @@
 #' @import ggplot2
-#' @importFrom dplyr %>%
-
+#' @import dplyr
+#' @importFrom textreadr read_html
+#' @importFrom utils download.file unzip
+#' @importFrom raster as.data.frame raster merge
 
 #' @export
 SRTM.list <- function(resolution, want.plot = TRUE)
@@ -29,8 +31,6 @@ SRTM.list <- function(resolution, want.plot = TRUE)
 
   if(want.plot)
   {
-    libs <- c("ggplot2", "ggmap")
-    invisible(lapply(libs, library, character.only = TRUE))
     data.plot<- NULL
     for(i in 1:length(files))
     {
@@ -43,9 +43,9 @@ SRTM.list <- function(resolution, want.plot = TRUE)
       data.plot <- rbind(data.plot, data.frame(lat = lat, lon = lon, group = group))
     }
 
-    WorldData <- ggplot2::map_data('world')
-    WorldData %>% dplyr::filter(WorldData$region != "Antarctica") -> WorldData
-    WorldData <- ggplot2::fortify(WorldData)
+    WorldData <- map_data('world')
+    WorldData %>% filter(WorldData$region != "Antarctica") -> WorldData
+    WorldData <- fortify(WorldData)
 
     p <- ggplot()
     p <- p + geom_map(map=WorldData, fill=NA, colour="gray30", size=0.5) +
