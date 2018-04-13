@@ -4,6 +4,8 @@ There are many publicly available solar datasets. This package contains function
 - NREL [Physical Solar Model (PSM)](https://nsrdb.nrel.gov/current-version) version 3, gridded satellite-derived irradiance data
 - NOAA [Surface Radiation (SURFRAD)](https://www.esrl.noaa.gov/gmd/grad/surfrad/), long-term high-resolution ground-based irradiance data
 - NASA [Shuttle Radar Topography Mission (SRTM)](https://www2.jpl.nasa.gov/srtm/cbanddataproducts.html), digital elevation model data
+- SoDa [Linke Turbidity Factor (LTF)](http://www.soda-pro.com/help/general-knowledge/linke-turbidity-factor), Linke turbidity data
+
 
 ## Getting Started
 
