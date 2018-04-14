@@ -97,6 +97,7 @@ OSMG.read <- function(files, directory_LI200, directory_RSR = NULL, clear_sky = 
   #LI-200 station names
   stations = c("DH3", "DH4", "DH5", "DH10", "DH11", "DH9", "DH2", "DH1", "DH1T", "AP6", "AP6T", "AP1", "AP3", "AP5", "AP4", "AP7", "DH6", "DH7", "DH8")
 
+  setwd(directory_LI200) #read LI-200 files first
   data_all <- NULL
   for(x in files)
   {
@@ -152,13 +153,13 @@ OSMG.read <- function(files, directory_LI200, directory_RSR = NULL, clear_sky = 
         mutate_all(., funs(round(., 3))) %>%
         mutate_all(., funs(replace(., .<0, 0))) %>%
         mutate(., Time = lubridate::ceiling_date(Tm_AP2, paste0(agg, " seconds"))) %>%
-        group_by(data_AP2$Time) %>%
+        group_by(Time) %>%
         summarise_all(funs(mean), na.rm = TRUE)
 
       #aggregate 1-sec data
       data <- data %>%
         mutate(., Time = lubridate::ceiling_date(Tm, paste0(agg, " seconds"))) %>%
-        group_by(data$Time) %>%
+        group_by(Time) %>%
         summarise_all(funs(mean), na.rm = TRUE)
 
       data_day <- left_join(data, data_AP2)
@@ -166,7 +167,7 @@ OSMG.read <- function(files, directory_LI200, directory_RSR = NULL, clear_sky = 
       #aggregate 1-sec data
       data <- data %>%
         mutate(., Time = lubridate::ceiling_date(Tm, paste0(agg, " seconds"))) %>%
-        group_by(data$Time) %>%
+        group_by(Time) %>%
         summarise_all(funs(mean), na.rm = TRUE)
 
       data_day <- data
