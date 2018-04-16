@@ -27,6 +27,3 @@ SURFRAD.get <- function(station, year, day_of_year, directory = "data-raw")
 }
 
 
-
-
-

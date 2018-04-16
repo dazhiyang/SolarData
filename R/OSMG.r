@@ -4,6 +4,7 @@
 #' @importFrom geosphere destPoint alongTrackDistance
 #' @importFrom fields rdist.earth
 #' @importFrom utils read.table
+#' @importFrom grDevices hcl
 
 . <- "Shut up"
 #################################################################################
@@ -88,6 +89,30 @@ GetAlongWindDist <- function(lon, lat, wind.dir)
   dist
 }
 
+gg_color_hue <- function(n) {
+  hues = seq(15, 375, length = n + 1)
+  grDevices::hcl(h = hues, l = 65, c = 100)[1:n]
+}
+
+################################################################################
+#function to calculate the ceiling of time, lubridate doesn't work for 50 sec!!
+################################################################################
+ceiling.time <- function(Tm, agg.interval)
+{
+  if(class(Tm)[1] != "POSIXct")
+    stop("'Tm' must be a POSIXct object")
+
+  TZ <- tz(Tm[1])
+  #convert to UTC
+  attributes(Tm)$tzone <- "UTC"
+  tmp <- ceiling(unclass(Tm)/(agg.interval))*(agg.interval)
+  origin <- as.POSIXct('1970-01-01 00:00:00', tz = "UTC")
+  Tm <- as.POSIXct(tmp, origin = origin, tz = "UTC")
+  attributes(Tm)$tzone <- TZ
+  Tm
+}
+
+
 ################################################################################
 #function to read and aggregate OSMG
 ################################################################################
@@ -152,13 +177,13 @@ OSMG.read <- function(files, directory_LI200, directory_RSR = NULL, clear_sky = 
         dplyr::select(., c(5:7)) %>%
         mutate_all(., funs(round(., 3))) %>%
         mutate_all(., funs(replace(., .<0, 0))) %>%
-        mutate(., Time = lubridate::ceiling_date(Tm_AP2, paste0(agg, " seconds"))) %>%
+        mutate(., Time = ceiling.time(Tm_AP2, agg)) %>%
         group_by(Time) %>%
         summarise_all(funs(mean), na.rm = TRUE)
 
       #aggregate 1-sec data
       data <- data %>%
-        mutate(., Time = lubridate::ceiling_date(Tm, paste0(agg, " seconds"))) %>%
+        mutate(., Time = ceiling.time(Tm, agg)) %>%
         group_by(Time) %>%
         summarise_all(funs(mean), na.rm = TRUE)
 
@@ -166,7 +191,7 @@ OSMG.read <- function(files, directory_LI200, directory_RSR = NULL, clear_sky = 
     }else if(!AP2){
       #aggregate 1-sec data
       data <- data %>%
-        mutate(., Time = lubridate::ceiling_date(Tm, paste0(agg, " seconds"))) %>%
+        mutate(., Time = ceiling.time(Tm, agg)) %>%
         group_by(Time) %>%
         summarise_all(funs(mean), na.rm = TRUE)
 
@@ -179,9 +204,6 @@ OSMG.read <- function(files, directory_LI200, directory_RSR = NULL, clear_sky = 
 
   data_all
 }
-
-
-
 
 
 
