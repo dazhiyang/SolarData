@@ -63,6 +63,7 @@ pair_cw = matrix(c(11, 6, 13, 7, 6, 8, 4,
                    10, 7, 14, 9, 9, 9, 5), ncol = 2, byrow = FALSE)
 
 #read raw data and aggregate to 10 s
+#NOTE: This part assumes that you have the 26 files (13 days mentioned in the paper) downloaded in the two folders
 dir_LI200 <- "/Volumes/Macintosh Research/Data/Oahu/raw"
 dir_RSR <- "/Volumes/Macintosh Research/Data/Oahu/raw AP2"
 setwd(dir_LI200)
