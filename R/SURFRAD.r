@@ -131,10 +131,14 @@ QC.Basic <- function(df)
 
   #check physical limit and flag
   df <- df %>%
-    mutate(phy.lim = ifelse(df$dw_solar > phy.lim.Gh | df$diffuse > phy.lim.Dh | df$direct_n*df$Mu0 > phy.lim.BI | df$dw_solar < -4 | df$diffuse < -4 | df$direct_n*df$Mu0 < -4, 1, 0))
+    mutate(phy.lim.G = ifelse(df$dw_solar > phy.lim.Gh | df$dw_solar < -4, 1, 0)) %>%
+    mutate(phy.lim.D = ifelse(df$diffuse > phy.lim.Dh | df$diffuse < -4, 1, 0)) %>%
+    mutate(phy.lim.I = ifelse(df$direct_n*df$Mu0 > phy.lim.BI | df$direct_n*df$Mu0 < -4, 1, 0))
   #check extreme-rare limit and flag
   df <- df %>%
-    mutate(ext.lim = ifelse(df$dw_solar > ext.lim.Gh | df$diffuse > ext.lim.Dh | df$direct_n*df$Mu0 > ext.lim.BI | df$dw_solar < -2 | df$diffuse < -2 | df$direct_n*df$Mu0 < -2, 1, 0))
+    mutate(ext.lim.G = ifelse(df$dw_solar > ext.lim.Gh | df$dw_solar < -2, 1, 0)) %>%
+    mutate(ext.lim.D = ifelse(df$diffuse > ext.lim.Dh | df$diffuse < -2, 1, 0)) %>%
+    mutate(ext.lim.I = ifelse(df$direct_n*df$Mu0 > ext.lim.BI | df$direct_n*df$Mu0 < -2, 1, 0))
 
   #check closure
   df <- df %>%
@@ -158,6 +162,10 @@ QC.Basic <- function(df)
 # files <- dir()
 #
 # dat <- SURFRAD.read(files, use.original.qc = F, directory = directory)
+
+#plot(dat$dw_solar[dat$phy.lim.G==1])
+#plot(dat$diffuse[dat$phy.lim.D==1])
+#plot(as.numeric(dat$direct_n[dat$phy.lim.I==1]))
 
 # dir <- "/Volumes/Macintosh Research/Data/surfrad/Linke Turbidity"
 # data("SURFRAD.loc")
