@@ -119,7 +119,6 @@ SURFRAD.read <- function(files, use.original.qc = FALSE, directory)
 }#end read function
 
 
-
 QC.Basic <- function(df)
 {
   #physical and extremely-rare limit
