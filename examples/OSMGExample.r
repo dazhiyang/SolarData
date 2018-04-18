@@ -68,7 +68,7 @@ dir_LI200 <- "/Volumes/Macintosh Research/Data/Oahu/raw"
 dir_RSR <- "/Volumes/Macintosh Research/Data/Oahu/raw AP2"
 setwd(dir_LI200)
 files <- dir()
-data <- OSMG.read(files, directory_LI200 = dir_LI200, directory_RSR = dir_RSR, clear_sky = TRUE, AP2 = TRUE, agg = 10)
+data <- OSMG.read(files, directory.LI200 = dir_LI200, directory.RSR = dir_RSR, clear.sky = TRUE, AP2 = TRUE, agg = 10)
 
 #data filters
 data <- data %>%

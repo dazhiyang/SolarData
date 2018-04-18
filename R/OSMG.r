@@ -1,6 +1,6 @@
 #' @import insol
 #' @import dplyr
-#' @importFrom lubridate ceiling_date
+#' @importFrom lubridate tz
 #' @importFrom geosphere destPoint alongTrackDistance
 #' @importFrom fields rdist.earth
 #' @importFrom utils read.table
@@ -102,7 +102,7 @@ ceiling.time <- function(Tm, agg.interval)
   if(class(Tm)[1] != "POSIXct")
     stop("'Tm' must be a POSIXct object")
 
-  TZ <- tz(Tm[1])
+  TZ <- lubridate::tz(Tm[1])
   #convert to UTC
   attributes(Tm)$tzone <- "UTC"
   tmp <- ceiling(unclass(Tm)/(agg.interval))*(agg.interval)
@@ -117,17 +117,17 @@ ceiling.time <- function(Tm, agg.interval)
 #function to read and aggregate OSMG
 ################################################################################
 #' @export
-OSMG.read <- function(files, directory_LI200, directory_RSR = NULL, clear_sky = FALSE, AP2 = FALSE, agg = 1)
+OSMG.read <- function(files, directory.LI200, directory.RSR = NULL, clear.sky = FALSE, AP2 = FALSE, agg = 1)
 {
   #LI-200 station names
   stations = c("DH3", "DH4", "DH5", "DH10", "DH11", "DH9", "DH2", "DH1", "DH1T", "AP6", "AP6T", "AP1", "AP3", "AP5", "AP4", "AP7", "DH6", "DH7", "DH8")
 
-  setwd(directory_LI200) #read LI-200 files first
+  setwd(directory.LI200) #read LI-200 files first
   data_all <- NULL
   for(x in files)
   {
     cat("Reading and processing", x, "...\n")
-    setwd(directory_LI200)
+    setwd(directory.LI200)
     #read data
     data <- read.table(x, header = FALSE, sep = ",", colClasses = c(rep("character", 4), rep("numeric", 19))) #read data
     names(data) <- c("SS", "year", "doy", "HM", stations)
@@ -144,7 +144,7 @@ OSMG.read <- function(files, directory_LI200, directory_RSR = NULL, clear_sky = 
       mutate_all(., funs(round(., 3))) %>%
       mutate_all(., funs(replace(., .<0, 0)))
 
-    if(clear_sky)
+    if(clear.sky)
     {
       #since loading the tiff images is slow, the values are listed here
       LT <- c(3.50, 3.80, 4.05, 4.55, 4.45, 4.55, 4.50, 4.35, 4.45, 4.45, 3.85, 3.75)
@@ -155,7 +155,7 @@ OSMG.read <- function(files, directory_LI200, directory_RSR = NULL, clear_sky = 
         dplyr::select(., c(20:22, 9, 11, 1:8, 10, 12:19))
     }
 
-    if(AP2 & is.null(directory_RSR))
+    if(AP2 & is.null(directory.RSR))
     {
       stop("Please specify the directory for RSR (AP2) dataset")
     }
@@ -164,7 +164,7 @@ OSMG.read <- function(files, directory_LI200, directory_RSR = NULL, clear_sky = 
       stop("AP2 is 3-sec data, please choose a higher 'agg' value")
     }else if(agg >= 3 & AP2)
     {
-      setwd(directory_RSR)
+      setwd(directory.RSR)
       data_AP2 = utils::read.table(x, header = FALSE, sep = ",", colClasses = c(rep("character", 4), rep("numeric", 3))) #read data
       names(data_AP2) <- c("SS", "year", "doy", "HM", "AP2", "AP2.dif", "AP2.dir")
       #arrange the date and time
@@ -204,77 +204,5 @@ OSMG.read <- function(files, directory_LI200, directory_RSR = NULL, clear_sky = 
 
   data_all
 }
-
-
-
-
-# loc = read.csv("/Users/DYang/Dropbox/Working papers/HEM/Data/HawaiiStations.csv", header = TRUE)
-# loc = loc[-c(9, 11),] #remove tilted stations
-# lat = loc$Latitude; lon = loc$Longitude; loc.name = loc$Name
-# dist.aw = GetAlongWindDist(lon, lat, wind.dir = 60)
-# aw.order = order(dist.aw[14,]) #14 is AP7, order in increasing distance
-# loc = loc[aw.order,]#order the locations in along-wind direction
-# lat = loc$Latitude; lon = loc$Longitude;
-# dist <- GetGeoDist(lon, lat)
-# dist.cw = GetAlongWindDist(lon, lat, wind.dir = -30) #get cross wind distance
-# dist.aw = GetAlongWindDist(lon, lat, wind.dir = 60)
-# #get distance in meters
-# dist.aw = dist.aw*1000; dist.cw = dist.cw*1000; dist = dist*1000;
-#
-# #Define along-wind and cross-wind pairs
-# #AP7 = 1, AP4 = 2, AP3 = 3, AP2 = 4, AP6 = 5, DH5 = 6, AP1 = 7, DH2 = 8, AP5 = 9, DH3 = 10, DH4 = 11, DH1 = 12, DH7 = 13, DH10 = 14, DH11 = 15, DH9 = 16, DH6 = 17, DH8 = 18
-# pair.aw = matrix(c( 7,  6, 10, 4,  7, 11,  4,  6, 2, 1,  3,  1,  1,
-#                     10, 11, 14, 7, 14, 17, 10, 17, 9, 3, 15, 15, 18), ncol = 2, byrow = FALSE)
-# pair.cw = matrix(c(11, 6, 13, 7, 6, 8, 4,
-#                    10, 7, 14, 9, 9, 9, 5), ncol = 2, byrow = FALSE)
-#
-#
-#
-# directory_LI200 <- "/Volumes/Macintosh Research/Data/Oahu/raw"
-# directory_RSR <- "/Volumes/Macintosh Research/Data/Oahu/raw AP2"
-# setwd(directory_LI200)
-# files <- dir()
-#
-# data <- OSMG.read(files, directory_LI200 = "/Volumes/Macintosh Research/Data/Oahu/raw", directory_RSR = "/Volumes/Macintosh Research/Data/Oahu/raw AP2", clear_sky = TRUE, AP2 = TRUE, agg = 60)
-# data <- data.frame(data)
-#
-# Tm = as.POSIXlt(data[,1], format = "%Y-%m-%d %H:%M:%S", tz = "HST")
-# select = which(Tm$hour>8&Tm$hour<15) #select 09:00 to 15:00
-# data = data[select, 7:24] #remove time column from the data frame, as well as those "non-noon" time
-# data = apply(data, 2, function(x) diff(x))
-# data = data[,aw.order] #order the data in along-wind direction
-# C = cor(data, use = "pairwise.complete.obs")
-#
-# mat.aw = mat.cw = mat.other.cor <- matrix(FALSE, 18, 18)
-# mat.other.cor[lower.tri(mat.other.cor)] <- TRUE
-# for(i in 1:nrow(pair.aw)){
-#   mat.aw[pair.aw[i, 2], pair.aw[i, 1]] <- TRUE
-#   mat.other.cor[pair.aw[i, 2], pair.aw[i, 1]] <- FALSE
-# }
-# C.aw <- C[mat.aw]; d.aw <- dist[mat.aw]; a.aw <- dist.aw[mat.aw]; b.aw <- dist.cw[mat.aw];
-#
-# for(i in 1:nrow(pair.cw)){
-#   mat.cw[pair.cw[i, 2], pair.cw[i, 1]] <- TRUE
-#   mat.other.cor[pair.aw[i, 2], pair.aw[i, 1]] <- FALSE
-# }
-# C.cw <- C[mat.cw]; d.cw <- dist[mat.cw]; a.cw <- dist.cw[mat.cw]; b.cw <- dist.cw[mat.cw];
-#
-# data.plot.point.aw <- data.frame(x = d.aw, y = C.aw)
-#
-#
-#
-# plot(data.plot.point.aw[,1], data.plot.point.aw[,2])
-#
-#
-#
-# data.plot.point.aw = rbind(data.plot.point.aw, data.frame(x = d.aw, y = C.aw, timescale = paste("Avg-", time.scale[j], "s", sep = "")))
-# data.plot.point.cw = rbind(data.plot.point.cw, data.frame(x = d.cw, y = C.cw, timescale = paste("Avg-", time.scale[j], "s", sep = "")))
-# data.plot.point.neither = rbind(data.plot.point.neither, data.frame(x = dist[mat.other.cor], y = C[mat.other.cor], timescale = paste("Avg-", time.scale[j], "s", sep = "")))
-
-
-
-
-
-
 
 

@@ -10,24 +10,24 @@ Get NREL PSM version 3 data
 Use API to download NREL Physical Solar Model (PSM) version 3 data in .csv format.
 }
 \usage{
-PSM.get(lon, lat, api_key, attributes, name, affiliation, year, leap_year,
-interval, utc, reason_for_use, email, mailing_list, directory = "data-raw")
+PSM.get(lon, lat, api.key, attributes, name, affiliation, year, leap.year,
+interval, utc, reason.for.use, email, mailing.list, directory = "data-raw")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{lon}{a number or a numeric array, longitude of the location(s) for downloading}
   \item{lat}{a number or a numeric array, latitude of the location(s) for downloading}
-  \item{api_key}{the API key as a character string, can be obtained at \url{https://developer.nrel.gov/signup/}}
+  \item{api.key}{the API key as a character string, can be obtained at \url{https://developer.nrel.gov/signup/}}
   \item{attributes}{the parameters to be downloaded, options are: "\code{air_temperature}", "\code{clearsky_dhi}", "\code{clearsky_dni}", "\code{clearsky_ghi}", "\code{cloud_type}", "\code{dew_point}", "\code{dhi}", "\code{dni}", "\code{fill_flag}", "\code{ghi}", "\code{relative_humidity}", "\code{solar_zenith_angle}", "\code{surface_albedo}", "\code{surface_pressure}", "\code{total_precipitable_water}", "\code{wind_direction}", "\code{wind_speed}". This argument should be passed in as a character string. If more than one, separate them using comma without spaces.}
   \item{name}{your name as a character string, e.g., "\code{John+Smith}". Spaces need to be replace with the + sign}
   \item{affiliation}{your affiliation as a character string, e.g., "\code{National+Renewable+Energy+Lab}". Spaces need to be replace with the + sign.}
   \item{year}{the year to be downloaded, options are: "\code{1998}", "\code{1999}", \eqn{\dots}, "\code{2016}", "\code{tmy}". This argument should be passed in as a character string. The API only allows downloading one year at a time}
-  \item{leap_year}{a character string ("\code{true}" or "\code{false}") indicating whether you want the data on 29 Feb if it is a leap year}
+  \item{leap.year}{a character string ("\code{true}" or "\code{false}") indicating whether you want the data on 29 Feb if it is a leap year}
   \item{interval}{a character string ("\code{30}" or "\code{60}") indicating whether you want 30 min or 60 min data}
   \item{utc}{a character string ("\code{true}" or "\code{false}") indicating whether you want the time to be UTC}
-  \item{reason_for_use}{a character string indicating your purpose, e.g., "\code{research+development}"}
+  \item{reason.for.use}{a character string indicating your purpose, e.g., "\code{research+development}"}
   \item{email}{your email as a character string, e.g., "\code{john.smith@gmail.com}"}
-  \item{mailing_list}{a character string ("\code{true}" or "\code{false}") indicating whether you want to be on the NREL mainling list}
+  \item{mailing.list}{a character string ("\code{true}" or "\code{false}") indicating whether you want to be on the NREL mainling list}
   \item{directory}{the directory for the downloads, default to "\code{~/data-raw}"}
 }
 \details{
