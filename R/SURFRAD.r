@@ -1,5 +1,5 @@
 #' @importFrom utils download.file
-#' @importFrom lubridate ymd_hm
+#' @importFrom lubridate ymd_hm month
 #' @importFrom tibble as_tibble
 
 
@@ -29,66 +29,136 @@ SURFRAD.get <- function(station, year, day_of_year, directory = "data-raw")
 
 }
 
+#' @export
+SURFRAD.read <- function(files, use.original.qc = FALSE, directory)
+{
+  setwd(directory)
 
-# SURFRAD.read <- function(files, use.original.qc = FALSE, directory)
-# {
-#   setwd(directory)
-#
-#   #get the Linke turbidity for the station
-#   if(length(unique(substr(files, 1, 3))) != 1)
-#     stop("Please process one location at a time")
-#   data("SURFRAD.loc")
-#   stn <- substr(files[1], 1, 3)
-#   LT <- as.numeric(SURFRAD.loc[match(stn, SURFRAD.loc$stn), 8:19])
-#   header = c("year","jday","month","day","hour","min","dt","zen",
-#              "dw_solar","qc_dwsolar","uw_solar","qc_uwsolar","direct_n","qc_direct_n","diffuse","qc_diffuse",
-#              "dw_ir","qc_dwir","dw_casetemp","qc_dwcasetemp","dw_dometemp","qc_dwdometemp",
-#              "uw_ir","qc_uwir","uw_casetemp","qc_uwcasetemp","uw_dometemp","qc_uwdometemp",
-#              "uvb","qc_uvb","par","qc_par","netsolar","qc_netsolar","netir","qc_netir","totalnet","qc_totalnet",
-#              "temp","qc_temp","rh","qc_rh","windspd","qc_windspd","winddir","qc_winddir","pressure","qc_pressure")
-#
-#   for(x in files)
-#   {
-#     date <- strptime(x = substr(x, 4, nchar(x)-4), format = "%y%j", tz = "UTC") #convert file name to date
-#     yr <- date$year+1900 #year
-#     res <- ifelse(yr >=2009, 1, 3) # data resolution, 1 min if yr>2009, 3 min otherwise
-#     #read data
-#     tmp <- read.table(x, header = FALSE, skip = 2)
-#     names(tmp) <- header
-#     #convert date time
-#     tmp <- tmp %>%
-#       mutate(., Time = lubridate::ymd_hm(paste(paste(tmp$year, tmp$month, tmp$day, sep = "-"), paste(tmp$hour, tmp$min, sep = ":"), sep = " "), tz = "UTC")) %>%
-#       dplyr::select(-(1:7)) %>%
-#       tibble::as_tibble(.)
-#
-#     if(use.original.qc)
-#     {
-#
-#     }
-#
-#     #complete time stamps. Even if no missing, still left_join
-#     ct <- tibble::as_tibble(data.frame(Time = seq(date, date+(60*24-1)*60, by  = res*60)))
-#     tmp <- tmp %>% left_join(ct, .)
-#
-#
-#
-#   }
-#
-#
-#
-#
-# }
-#
-#
-#
-#
-#
-#
-#
-#
+  # match the desired variables
+  header = c("year","jday","month","day","hour","min","dt","zen",
+             "dw_solar","qc_dwsolar","uw_solar","qc_uwsolar","direct_n","qc_direct_n","diffuse","qc_diffuse",
+             "dw_ir","qc_dwir","dw_casetemp","qc_dwcasetemp","dw_dometemp","qc_dwdometemp",
+             "uw_ir","qc_uwir","uw_casetemp","qc_uwcasetemp","uw_dometemp","qc_uwdometemp",
+             "uvb","qc_uvb","par","qc_par","netsolar","qc_netsolar","netir","qc_netir","totalnet","qc_totalnet",
+             "temp","qc_temp","rh","qc_rh","windspd","qc_windspd","winddir","qc_winddir","pressure","qc_pressure")
+  variables <- c("dw_solar","direct_n","diffuse","pressure")
+  choice <- match(variables, header)
+  choice <- sort(c(1:8, choice, choice+1))
+  colClasses <- rep("NULL", length(header))
+  colClasses[choice] <- "numeric"
+
+  #get the Linke turbidity for the station
+  if(length(unique(substr(files, 1, 3))) != 1)
+    stop("Please process one location at a time")
+
+  data("SURFRAD.loc")
+  stn <- substr(files[1], 1, 3)
+  stn <- match(stn, SURFRAD.loc$stn)
+  LT <- as.numeric(SURFRAD.loc[stn, 8:19])
+
+  data_all <- NULL
+  for(x in files)
+  {
+    date <- strptime(x = substr(x, 4, nchar(x)-4), format = "%y%j", tz = "UTC") # convert file name to date
+    yr <- date$year+1900 # year
+    mon <- lubridate::month(date) # month
+    res <- ifelse(yr >=2009, 1, 3) # data resolution, 1 min if yr>2009, 3 min otherwise
+    # read data
+    tmp <- read.table(x, header = FALSE, skip = 2, colClasses = colClasses)
+    names(tmp) <- header[choice]
+    # convert date time
+    tmp <- tmp %>%
+      mutate(., Time = lubridate::ymd_hm(paste(paste(tmp$year, tmp$month, tmp$day, sep = "-"), paste(tmp$hour, tmp$min, sep = ":"), sep = " "), tz = "UTC")) %>%
+      dplyr::select(-(1:7)) %>%
+      tibble::as_tibble(.)
+    #
+    if(use.original.qc)
+    {
+      # new variable: sum of all irradiance qc values
+      tmp <- tmp %>%
+        mutate(qc_all = tmp %>% dplyr::select(starts_with("qc")) %>% rowSums(.))
+      # rm the non-zero qc rows, and rm all qc columns
+      tmp <- tmp %>%
+        filter(tmp$qc_all == 0) %>%
+        dplyr::select(-starts_with("qc"))
+    }else{
+      # rm all qc columns
+      tmp <- tmp %>%
+        dplyr::select(-starts_with("qc"))
+    }
+
+    # compute (SolarData) QC parameters, note the time shift in solpos
+    solpos <- calZen(Tm = tmp$Time - res*30, lat = SURFRAD.loc$lat[stn], lon = SURFRAD.loc$lon[stn], tz = 0, LT[mon], alt = SURFRAD.loc$elev[stn])
+    tmp <- tmp %>%
+      filter(complete.cases(.)) %>%
+      mutate(Ics = solpos$Ics) %>%
+      mutate(Ioh = solpos$Ioh) %>%
+      mutate(Mu0 = ifelse(tmp$zen > 90, 0, cos(d2r(tmp$zen)))) %>%
+      mutate(Sa = solpos$Io) #%>%
+      #mutate(dw_solar = ifelse(tmp$dw_solar<0 | tmp$zen>90, 0, tmp$dw_solar)) %>%
+      #mutate(direct_n = ifelse(tmp$direct_n<0 | tmp$zen>90, 0, tmp$direct_n)) %>%
+      #mutate(diffuse = ifelse(tmp$diffuse<0 | tmp$zen>90, 0, tmp$diffuse))
+    # calculate closure
+    tmp <- tmp %>%
+      mutate(sum = tmp$diffuse + tmp$Mu0*tmp$direct_n)
+    # calculate Rayleigh limit
+    tmp <- tmp %>%
+      mutate(RL = 209.3*tmp$Mu0 - 708.38*(tmp$Mu0)^2 + 1128.7*tmp$Mu0^3 -911.2*tmp$Mu0^4 + 287.85*tmp$Mu0^5+0.046725*tmp$Mu0*tmp$pressure)
+
+    #perform basic QC on 1-min or 3-min data
+    tmp <- QC.Basic(tmp)
+
+    # complete time stamps. Even if no missing, still left_join
+    ct <- tibble::as_tibble(data.frame(Time = seq(date, date+(60*24-1)*60, by  = res*60)))
+    tmp <- tmp %>% left_join(ct, ., by = "Time")
+
+    data_all <- rbind(data_all, tmp)
+    print(x)
+  }#end for x in files
+  data_all
+}#end read function
+
+
+
+QC.Basic <- function(df)
+{
+  #physical and extremely-rare limit
+  phy.lim.Gh <- df$Sa*1.5*(df$Mu0)^1.2 + 100
+  ext.lim.Gh <- df$Sa*1.2*(df$Mu0)^1.2 + 50
+  phy.lim.Dh <- df$Sa*0.95*(df$Mu0)^1.2 + 50
+  ext.lim.Dh <- df$Sa*0.75*(df$Mu0)^1.2 + 30
+  phy.lim.BI <- df$Sa*df$Mu0
+  ext.lim.BI <- df$Sa*0.95*(df$Mu0)^1.2 + 10
+
+  #check physical limit and flag
+  df <- df %>%
+    mutate(phy.lim = ifelse(df$dw_solar > phy.lim.Gh | df$diffuse > phy.lim.Dh | df$direct_n*df$Mu0 > phy.lim.BI | df$dw_solar < -4 | df$diffuse < -4 | df$direct_n*df$Mu0 < -4, 1, 0))
+  #check extreme-rare limit and flag
+  df <- df %>%
+    mutate(ext.lim = ifelse(df$dw_solar > ext.lim.Gh | df$diffuse > ext.lim.Dh | df$direct_n*df$Mu0 > ext.lim.BI | df$dw_solar < -2 | df$diffuse < -2 | df$direct_n*df$Mu0 < -2, 1, 0))
+
+  #check closure
+  df <- df %>%
+    mutate(closr = ifelse(df$dw_solar > 50 & df$zen < 75 & abs((df$sum-df$dw_solar)/df$dw_solar)*100 > 8 , 1, 0))
+  df <- df %>%
+    mutate(closr = ifelse(df$dw_solar > 50 & df$zen > 75 & df$zen < 93 & abs((df$sum-df$dw_solar)/df$dw_solar)*100 > 15, 1, df$closr))
+
+  #check diffuse ratio
+  df <- df %>%
+    mutate(d.ratio = ifelse(df$diffuse/df$dw_solar > 1.05 & df$dw_solar>50 & df$zen < 75, 1, 0))
+  df <- df %>%
+    mutate(d.ratio = ifelse(df$diffuse/df$dw_solar > 1.10 & df$dw_solar>50 & df$zen > 75, 1, df$d.ratio))
+
+  df
+}
+
+
+
+
 # directory = "/Volumes/Macintosh Research/Data/surfrad/raw/bon/2015"
 # files <- dir()
-
+#
+# dat <- SURFRAD.read(files, use.original.qc = F, directory = directory)
 
 # dir <- "/Volumes/Macintosh Research/Data/surfrad/Linke Turbidity"
 # data("SURFRAD.loc")
