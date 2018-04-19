@@ -1,6 +1,7 @@
-#' @importFrom utils download.file
+#' @importFrom utils download.file txtProgressBar setTxtProgressBar data
 #' @importFrom lubridate ymd_hm month
 #' @importFrom tibble as_tibble
+#' @importFrom stats complete.cases
 
 
 #' @export
@@ -30,7 +31,7 @@ SURFRAD.get <- function(station, year, day_of_year, directory = "data-raw")
 }
 
 #' @export
-SURFRAD.read <- function(files, use.original.qc = FALSE, directory)
+SURFRAD.read <- function(files, use.original.qc = FALSE, progress.bar = TRUE, directory)
 {
   setwd(directory)
 
@@ -51,20 +52,22 @@ SURFRAD.read <- function(files, use.original.qc = FALSE, directory)
   if(length(unique(substr(files, 1, 3))) != 1)
     stop("Please process one location at a time")
 
-  data("SURFRAD.loc")
+  utils::data("SURFRAD.loc")
   stn <- substr(files[1], 1, 3)
   stn <- match(stn, SURFRAD.loc$stn)
   LT <- as.numeric(SURFRAD.loc[stn, 8:19])
 
-  data_all <- NULL
-  for(x in files)
+  data_all <- vector("list", length(files))
+  if(progress.bar)
+    pb <- utils::txtProgressBar(min = 0, max = length(files), style = 3)
+  for(i in 1:length(files))
   {
-    date <- strptime(x = substr(x, 4, nchar(x)-4), format = "%y%j", tz = "UTC") # convert file name to date
+    date <- strptime(x = substr(files[i], 4, nchar(files[i])-4), format = "%y%j", tz = "UTC") # convert file name to date
     yr <- date$year+1900 # year
     mon <- lubridate::month(date) # month
     res <- ifelse(yr >=2009, 1, 3) # data resolution, 1 min if yr>2009, 3 min otherwise
     # read data
-    tmp <- read.table(x, header = FALSE, skip = 2, colClasses = colClasses)
+    tmp <- read.table(files[i], header = FALSE, skip = 2, colClasses = colClasses)
     names(tmp) <- header[choice]
     # convert date time
     tmp <- tmp %>%
@@ -93,7 +96,7 @@ SURFRAD.read <- function(files, use.original.qc = FALSE, directory)
       filter(complete.cases(.)) %>%
       mutate(Ics = solpos$Ics) %>%
       mutate(Ioh = solpos$Ioh) %>%
-      mutate(Mu0 = ifelse(tmp$zen > 90, 0, cos(d2r(tmp$zen)))) %>%
+      mutate(Mu0 = ifelse(tmp$zen > 90, 0, cos(radians(tmp$zen)))) %>%
       mutate(Sa = solpos$Io) #%>%
       #mutate(dw_solar = ifelse(tmp$dw_solar<0 | tmp$zen>90, 0, tmp$dw_solar)) %>%
       #mutate(direct_n = ifelse(tmp$direct_n<0 | tmp$zen>90, 0, tmp$direct_n)) %>%
@@ -112,9 +115,13 @@ SURFRAD.read <- function(files, use.original.qc = FALSE, directory)
     ct <- tibble::as_tibble(data.frame(Time = seq(date, date+(60*24-1)*60, by  = res*60)))
     tmp <- tmp %>% left_join(ct, ., by = "Time")
 
-    data_all <- rbind(data_all, tmp)
-    print(x)
+    data_all[[i]] <- tmp
+    if(progress.bar)
+      utils::setTxtProgressBar(pb, i)
   }#end for x in files
+  if(progress.bar)
+    close(pb)
+  data_all <- do.call("rbind", data_all)
   data_all
 }#end read function
 
@@ -152,6 +159,11 @@ QC.Basic <- function(df)
   df <- df %>%
     mutate(d.ratio = ifelse(df$diffuse/df$dw_solar > 1.10 & df$dw_solar>50 & df$zen > 75, 1, df$d.ratio))
 
+  #check climatology
+  df <- df %>%
+    mutate(clim1 = ifelse(df$diffuse/df$dw_solar > 0.85 & df$dw_solar/df$Ics > 0.85 & df$diffuse>50, 1, 0)) %>%
+    mutate(clim2 = ifelse(df$diffuse<df$RL-1 & df$diffuse/df$dw_solar < 0.80 & df$dw_solar>50, 1, 0))
+
   df
 }
 
@@ -159,6 +171,7 @@ QC.Basic <- function(df)
 
 
 # directory = "/Volumes/Macintosh Research/Data/surfrad/raw/bon/2015"
+# setwd(directory)
 # files <- dir()
 #
 # dat <- SURFRAD.read(files, use.original.qc = F, directory = directory)
