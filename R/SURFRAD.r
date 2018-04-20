@@ -31,7 +31,7 @@ SURFRAD.get <- function(station, year, day_of_year, directory = "data-raw")
 }
 
 #' @export
-SURFRAD.read <- function(files, use.original.qc = FALSE, use.qc = TRUE, progress.bar = TRUE, directory)
+SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRUE, test = NULL, progress.bar = TRUE)
 {
   setwd(directory)
 
@@ -105,11 +105,6 @@ SURFRAD.read <- function(files, use.original.qc = FALSE, use.qc = TRUE, progress
       mutate(Ioh = solpos$Ioh) %>%
       mutate(Mu0 = ifelse(tmp$zen > 90, 0, cos(radians(tmp$zen)))) %>%
       mutate(Sa = solpos$Io)
-    # correct some known issues
-    # tmp <- tmp %>%
-    #   mutate(dw_solar = ifelse(tmp$dw_solar<0 | tmp$zen>90, 0, tmp$dw_solar)) %>%
-    #   mutate(direct_n = ifelse(tmp$direct_n<0 | tmp$zen>90, 0, tmp$direct_n)) %>%
-    #   mutate(diffuse = ifelse(tmp$diffuse<0 | tmp$zen>90, 0, tmp$diffuse))
     # calculate closure
     tmp <- tmp %>%
       mutate(sum = tmp$diffuse + tmp$Mu0*tmp$direct_n)
@@ -120,13 +115,15 @@ SURFRAD.read <- function(files, use.original.qc = FALSE, use.qc = TRUE, progress
     #perform basic QC on 1-min or 3-min data
     if(use.qc)
     {
-      tmp <- QC.Basic(tmp)
+      if(is.null(test))
+        stop("You must specify the test(s), avialable ones include 'phy', 'ext', 'closr', 'dr', 'clim', 'all.")
+      tmp <- QC.Basic(tmp, test)
       # new variable: sum of all irradiance qc values
       tmp <- tmp %>%
         mutate(qc_all = tmp %>% dplyr::select(starts_with("qc")) %>% rowSums(.))
       # set NA at the non-zero qc rows, and rm all qc columns
       tmp <- tmp %>%
-        mutate_at(.vars = c(3:6), funs(ifelse(tmp$qc_all>0, NA, .))) %>%
+        mutate_at(.vars = c(3:5), funs(ifelse(tmp$qc_all>0, NA, .))) %>%
         dplyr::select(-starts_with("qc"))
     }
 
@@ -136,46 +133,64 @@ SURFRAD.read <- function(files, use.original.qc = FALSE, use.qc = TRUE, progress
   }#end for x in files
   if(progress.bar)
     close(pb)
+
   cat("Concatenating files ...")
   data_all <- do.call("rbind", data_all)
   data_all <- data_all %>%
     mutate(dw_solar = ifelse(data_all$dw_solar<0 | data_all$zen>90, 0, data_all$dw_solar)) %>%
     mutate(direct_n = ifelse(data_all$direct_n<0 | data_all$zen>90, 0, data_all$direct_n)) %>%
-    mutate(diffuse = ifelse(data_all$diffuse<0 | data_all$zen>90, 0, data_all$diffuse))
+    mutate(diffuse = ifelse(data_all$diffuse<0 | data_all$zen>90, 0, data_all$diffuse)) %>%
+    dplyr::select(-matches("Mu0|Sa|sum|RL"))
   data_all
 
 }#end read function
 
 
-QC.Basic <- function(df)
+QC.Basic <- function(df, test)
 {
   #check physical limit and flag
-  df <- df %>%
-    mutate(qc_phy_G = ifelse(df$dw_solar > df$Sa*1.5*(df$Mu0)^1.2 + 100 | df$dw_solar < -4, 1, 0)) %>%
-    mutate(qc_phy_D = ifelse(df$diffuse > df$Sa*0.95*(df$Mu0)^1.2 + 50 | df$diffuse < -4, 1, 0)) %>%
-    mutate(qc_phy_I = ifelse(df$direct_n*df$Mu0 > df$Sa*df$Mu0 | df$direct_n*df$Mu0 < -4, 1, 0))
+  if("phy" %in% test | "all" %in% test)
+  {
+    df <- df %>%
+      mutate(qc_phy_G = ifelse(df$dw_solar > df$Sa*1.5*(df$Mu0)^1.2 + 100 | df$dw_solar < -4, 1, 0)) %>%
+      mutate(qc_phy_D = ifelse(df$diffuse > df$Sa*0.95*(df$Mu0)^1.2 + 50 | df$diffuse < -4, 1, 0)) %>%
+      mutate(qc_phy_I = ifelse(df$direct_n*df$Mu0 > df$Sa*df$Mu0 | df$direct_n*df$Mu0 < -4, 1, 0))
+  }
+
   #check extreme-rare limit and flag
-  df <- df %>%
-    mutate(qc_ext_G = ifelse(df$dw_solar > df$Sa*1.2*(df$Mu0)^1.2 + 50 | df$dw_solar < -2, 1, 0)) %>%
-    mutate(qc_ext_D = ifelse(df$diffuse > df$Sa*0.75*(df$Mu0)^1.2 + 30 | df$diffuse < -2, 1, 0)) %>%
-    mutate(qc_ext_I = ifelse(df$direct_n*df$Mu0 > df$Sa*0.95*(df$Mu0)^1.2 + 10 | df$direct_n*df$Mu0 < -2, 1, 0))
+  if("ext" %in% test | "all" %in% test)
+  {
+    df <- df %>%
+      mutate(qc_ext_G = ifelse(df$dw_solar > df$Sa*1.2*(df$Mu0)^1.2 + 50 | df$dw_solar < -2, 1, 0)) %>%
+      mutate(qc_ext_D = ifelse(df$diffuse > df$Sa*0.75*(df$Mu0)^1.2 + 30 | df$diffuse < -2, 1, 0)) %>%
+      mutate(qc_ext_I = ifelse(df$direct_n*df$Mu0 > df$Sa*0.95*(df$Mu0)^1.2 + 10 | df$direct_n*df$Mu0 < -2, 1, 0))
+  }
 
   #check closure
-  df <- df %>%
-    mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen < 75 & abs((df$sum-df$dw_solar)/df$dw_solar)*100 > 8 , 1, 0))
-  df <- df %>%
-    mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen > 75 & df$zen < 93 & abs((df$sum-df$dw_solar)/df$dw_solar)*100 > 15, 1, df$qc_closr))
+  if("closr" %in% test | "all" %in% test)
+  {
+    df <- df %>%
+      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen < 75 & abs((df$sum-df$dw_solar)/df$dw_solar)*100 > 8 , 1, 0))
+    df <- df %>%
+      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen > 75 & df$zen < 93 & abs((df$sum-df$dw_solar)/df$dw_solar)*100 > 15, 1, df$qc_closr))
+  }
 
   #check diffuse ratio
-  df <- df %>%
-    mutate(qc_d_ratio = ifelse(df$diffuse/df$dw_solar > 1.05 & df$dw_solar>50 & df$zen < 75, 1, 0))
-  df <- df %>%
-    mutate(qc_d_ratio = ifelse(df$diffuse/df$dw_solar > 1.10 & df$dw_solar>50 & df$zen > 75, 1, df$qc_d_ratio))
+  if("dr" %in% test | "all" %in% test)
+  {
+    df <- df %>%
+      mutate(qc_d_ratio = ifelse(df$diffuse/df$dw_solar > 1.05 & df$dw_solar>50 & df$zen < 75, 1, 0))
+    df <- df %>%
+      mutate(qc_d_ratio = ifelse(df$diffuse/df$dw_solar > 1.10 & df$dw_solar>50 & df$zen > 75, 1, df$qc_d_ratio))
+  }
 
   #check climatology
-  df <- df %>%
-    mutate(qc_clim1 = ifelse(df$diffuse/df$dw_solar > 0.85 & df$dw_solar/df$Ics > 0.85 & df$diffuse>50, 1, 0)) %>%
-    mutate(qc_clim2 = ifelse(df$diffuse<df$RL-1 & df$diffuse/df$dw_solar < 0.80 & df$dw_solar>50, 1, 0))
+  if("clim" %in% test | "all" %in% test)
+  {
+    df <- df %>%
+      mutate(qc_clim1 = ifelse(df$diffuse/df$dw_solar > 0.85 & df$dw_solar/df$Ics > 0.85 & df$diffuse>50, 1, 0)) %>%
+      mutate(qc_clim2 = ifelse(df$diffuse<df$RL-1 & df$diffuse/df$dw_solar < 0.80 & df$dw_solar>50, 1, 0))
+  }
 
   df
 }
@@ -187,7 +202,7 @@ QC.Basic <- function(df)
 # setwd(directory)
 # files <- dir()
 #
-# dat <- SURFRAD.read(files, use.original.qc = F, use.qc = T, directory = directory)
+# dat <- SURFRAD.read(files, use.original.qc = F, use.qc = T, test = c("phy"), directory = directory)
 
 #plot(dat$dw_solar[dat$phy.lim.G==1])
 #plot(dat$diffuse[dat$phy.lim.D==1])

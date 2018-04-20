@@ -37,15 +37,21 @@ calZen <- function(Tm, lat, lon, tz = 0, LT, alt = 0)
   EOT <- rowSums(sapply(1:6, function(i) coef[i,2]*cos(2*pi*coef[i,1]*dn/365.25) + coef[i,3]*sin(2*pi*coef[i,1]*dn/365.25)))*60 #EOT in minutes
   Tsolar <- Tm - 4*60*(tz*15-lon) + EOT*60
 
+  #find pressure from altitude
+  pressure = 100 * ((44331.514 - alt)/11880.516)^(1/0.1902632)
+
   #Perez-Ineichen clear sky model (Ineichen and Perez, 2002), monthly Linke turbidity can be obtained from SoDa service (following: Gueymard and Ruiz-Aries, 2015)
   fh1 <- exp(-alt/8000)
   fh2 <- exp(-alt/1250)
   cg1 <- (0.0000509*alt + 0.868)
   cg2 <- (0.0000392*alt + 0.0387)
-  AM <- 1/(cos(zen*pi/180)+0.50572*(96.07995 - zen)^(-1.6364))
-  Ics <- cg1*Io*cos(radians(zen))*exp(-cg2*AM*(fh1 + fh2*(LT-1)))*exp(0.01*AM^1.8)
+  z <- pmin(zen, 90)
+  #M <- 1/(cos(radians(z))+0.50572*(96.07995 - z)^(-1.6364))
+  AM <- 1/(cos(radians(z))+0.00176759*(z)*((94.37515 - z)^(-1.21563)))
+  AM <- AM/101325*pressure #elevation corrected AM
+  Ics <- cg1*Io*cos(radians(z))*exp(-cg2*AM*(fh1 + fh2*(LT-1)))*exp(0.01*pmin(AM,12)^1.8)
   Ics <- ifelse(zen>=90, 0, Ics)
-  Icsd <- (0.664+0.163/fh1)*Io*exp(-0.09*(LT-1)*AM)*cos(zen*pi/180)
+  Icsd <- (0.664+0.163/fh1)*Io*exp(-0.09*(LT-1)*AM)*cos(z)
   Icsd <- ifelse(zen>=90, 0, Icsd)
 
   out = list(zen, Io, Ioh, Ics, Icsd, Tsolar)
