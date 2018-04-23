@@ -47,16 +47,18 @@ SRTM.list <- function(resolution, want.plot = TRUE)
     WorldData %>% filter(WorldData$region != "Antarctica") -> WorldData
     WorldData <- fortify(WorldData)
 
+    east <- ifelse(resolution == 1, -50, 180)
+    south <- ifelse(resolution == 1, 10, -60)
     p <- ggplot()
     p <- p + geom_map(map=WorldData, fill=NA, colour="gray30", size=0.5) +
       geom_tile(data=data.plot, aes(lon+0.5,lat+0.5, color = group), alpha=0, size = 0.1) +
       coord_fixed() +
-      scale_x_continuous(expand = c(0, 0)) +
-      scale_y_continuous(expand = c(0, 0)) +
+      scale_x_continuous(limits = c(-180, east), expand = c(0, 0)) +
+      scale_y_continuous(limits = c(south, 60), expand = c(0, 0)) +
       xlab(expression(paste("Longitude [", degree, "]", sep = ""))) +
       ylab(expression(paste("Latitude [", degree, "]", sep = ""))) +
       theme_bw() +
-      theme(plot.margin = unit(c(0,0,0,0), "lines"), legend.position = "bottom", legend.box.spacing = unit(c(-0.5,0,0.5,0), "lines"), text = element_text(size = 7), legend.background = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), strip.text.x = element_text(margin = margin(0.2,0,0.2,0, "lines"))    )
+      theme(plot.margin = unit(c(0,0,0,0), "lines"), legend.position = "bottom", legend.box.spacing = unit(c(-0.5,0,0.5,0), "lines"), legend.key.size = unit(0.3, "cm"), text = element_text(size = 7), legend.background = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), strip.text.x = element_text(margin = margin(0.2,0,0.2,0, "lines"))    )
     print(p)
   }
 
