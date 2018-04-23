@@ -176,13 +176,13 @@ OSMG.read <- function(files, directory.LI200, directory.RSR = NULL, clear.sky = 
         mutate_all(., funs(replace(., .<0, 0))) %>%
         mutate(., Time = ceiling.time(Tm_AP2, agg)) %>%
         group_by(Time) %>%
-        summarise_all(funs(mean), na.rm = TRUE)
+        summarise_all(funs(mean), args = list(na.rm = TRUE))
 
       #aggregate 1-sec data
       data <- data %>%
         mutate(., Time = ceiling.time(Tm, agg)) %>%
         group_by(Time) %>%
-        summarise_all(funs(mean), na.rm = TRUE)
+        summarise_all(funs(mean), args = list(na.rm = TRUE))
 
       data_day <- left_join(data, data_AP2)
     }else if(!AP2){
@@ -190,7 +190,7 @@ OSMG.read <- function(files, directory.LI200, directory.RSR = NULL, clear.sky = 
       data <- data %>%
         mutate(., Time = ceiling.time(Tm, agg)) %>%
         group_by(Time) %>%
-        summarise_all(funs(mean), na.rm = TRUE)
+        summarise_all(funs(mean), args = list(na.rm = TRUE))
 
       data_day <- data
     } #end joining if's

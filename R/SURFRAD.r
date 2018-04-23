@@ -31,7 +31,7 @@ SURFRAD.get <- function(station, year, day_of_year, directory = "data-raw")
 }
 
 #' @export
-SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRUE, test = NULL, progress.bar = TRUE)
+SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRUE, test = NULL, progress.bar = TRUE, agg = 1)
 {
   setwd(directory)
 
@@ -134,15 +134,39 @@ SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRU
   if(progress.bar)
     close(pb)
 
-  cat("Concatenating files ...")
+  cat("Concatenating files ...\n")
   data_all <- do.call("rbind", data_all)
   data_all <- data_all %>%
     mutate(dw_solar = ifelse(data_all$dw_solar<0 | data_all$zen>90, 0, data_all$dw_solar)) %>%
     mutate(direct_n = ifelse(data_all$direct_n<0 | data_all$zen>90, 0, data_all$direct_n)) %>%
     mutate(diffuse = ifelse(data_all$diffuse<0 | data_all$zen>90, 0, data_all$diffuse)) %>%
     dplyr::select(-matches("Mu0|Sa|sum|RL"))
-  data_all
 
+  #time difference
+  diffs <- as.numeric(data_all$Time[2:nrow(data_all)]-data_all$Time[1:(nrow(data_all)-1)])
+  #aggregate
+  if(max(diffs) == 3 & agg < 3)
+  {
+    stop("you have 3-min data, 'agg' must be at least 3")
+  }else if(agg>1){
+    cat("Aggregating files ...\n")
+    data_all <- data_all %>%
+      mutate(., Time = ceiling.time(data_all$Time, agg*60))
+    #check number of points in each aggregation interval
+    n.point.in.each.interval <- array(0, length(unique(data_all$Time)))
+    non.empty.interval <- match(unique(data_all$Time[-which(is.na(data_all$dw_solar))]), unique(data_all$Time))
+    n.point.in.each.interval[non.empty.interval] <- rle(as.numeric(data_all$Time[-which(is.na(data_all$dw_solar))]))$length
+    #assign NAs, so that when aggregate, these intervals will be NA-valued.
+    bad.interval <- unique(data_all$Time)[which(n.point.in.each.interval < round(agg/2))][-1]
+    remove <- which(data_all$Time %in% bad.interval)
+    data_all[remove, c(3:5)] <- NA
+    data_all <- data_all %>%
+      group_by(Time) %>%
+      summarise_all(funs(mean), args = list(na.rm = TRUE))
+  }
+
+  # output
+  data_all
 }#end read function
 
 
@@ -196,17 +220,6 @@ QC.Basic <- function(df, test)
 }
 
 
-
-
-# directory = "/Volumes/Macintosh Research/Data/surfrad/raw/bon/2015"
-# setwd(directory)
-# files <- dir()
-#
-# dat <- SURFRAD.read(files, use.original.qc = F, use.qc = T, test = c("phy"), directory = directory)
-
-#plot(dat$dw_solar[dat$phy.lim.G==1])
-#plot(dat$diffuse[dat$phy.lim.D==1])
-#plot(as.numeric(dat$direct_n[dat$phy.lim.I==1]))
 
 # dir <- "/Volumes/Macintosh Research/Data/surfrad/Linke Turbidity"
 # data("SURFRAD.loc")
