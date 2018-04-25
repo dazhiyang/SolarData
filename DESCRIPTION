@@ -14,7 +14,7 @@ Imports:
 Authors@R: person("Dazhi", "Yang", email = "yangdazhi.nus@gmail.com", role = c("aut", "cre"))
 Description: Download and manipulate some publicly available solar datasets.
 Depends: 
-  R (>= 3.4.4), 
+  R (>= 3.4.3), 
   ggplot2, 
   insol,
   dplyr
