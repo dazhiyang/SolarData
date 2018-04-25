@@ -65,16 +65,15 @@ AST <- degrees(ha)/15 + 12
 #################################################################################
 # separation models
 #################################################################################
+#predicted diffuse fraction
 Kd_Erbs <- sapply(Kt, Erbs)
 Kd_Engerer2 <- Engerer2(Kt, AST, theta_z, delta_Ktc, Kde)
-
-DIF_Erbs <- Kd_Erbs * data$dw_solar
-DIF_Engerer2 <- Kd_Engerer2 * data$dw_solar
-
-#error in percentage
-nRMSE(meas = data$diffuse, pred = DIF_Erbs)
-nRMSE(meas = data$diffuse, pred = DIF_Engerer2)
-
+#predicted DNI
+DNI_Erbs <- (data$dw_solar - Kd_Erbs * data$dw_solar)/cos(radians(theta_z))
+DNI_Engerer2 <- (data$dw_solar - Kd_Engerer2 * data$dw_solar)/cos(radians(theta_z))
+#error in percentage, comparable to Gueymard's report at bon, see his supplementary material mmc2 (spreadsheet)
+nRMSE(meas = data$direct_n, pred = DNI_Erbs)
+nRMSE(meas = data$direct_n, pred = DNI_Engerer2)
 #plot
 plot(Kt, data$diffuse/ data$dw_solar, pch = ".", ylim = c(0,1))
 points(Kt, Kd_Erbs, col = 2, pch = ".")
