@@ -1,9 +1,10 @@
 # In this example, I show how to validate the Engerer2 (Engerer, SE, 2015) separation model using SURFRAD data
 
 library(SolarData) #load the package
+data("SURFRAD.loc")
 
 #################################################################################
-# some separation models
+# two separation models, and normalize RMSE function
 #################################################################################
 Erbs <- function(Kt)
 {
@@ -35,8 +36,6 @@ nRMSE <- function(meas, pred)
 #################################################################################
 # read raw data, filter data, and calculate some required parameters
 #################################################################################
-data("SURFRAD.loc")
-
 # NOTE: This part assumes that you have the 365 daily files from bon downloaded
 directory = "/Volumes/Macintosh Research/Data/surfrad/raw/bon/2016"
 setwd(directory)
