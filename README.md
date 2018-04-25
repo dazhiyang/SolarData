@@ -38,7 +38,7 @@ install_github("dazhiyang/SolarData")
 
 ## Running the tests
 
-This code segment gives an example on how to run transposition modeling (horizontal to tilt) using a variety of models. 
+This code segment gives an example on how to run transposition modeling (horizontal to tilt) using a variety of models. (This is not up to date, I will update this section, as well as the package reference manual once the paper is accepted for publication)
 
 ```
 library("SolarData")
