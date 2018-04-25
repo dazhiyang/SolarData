@@ -57,4 +57,4 @@ SRTM.get(resolution = 3, files = files)
 
 ## License
 
-This package is under the MIT license.
+This package is under the GPL-2 license.
