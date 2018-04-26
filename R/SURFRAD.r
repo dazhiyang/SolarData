@@ -30,6 +30,16 @@ SURFRAD.get <- function(station, year, day.of.year, directory = "data-raw")
 
 }
 
+# directory <- "/Volumes/Macintosh Research/Data/surfrad/raw/bon/2005"
+# setwd(directory)
+# files <- dir()
+# use.original.qc = FALSE
+# use.qc = TRUE
+# test = c("ext", "closr")
+# progress.bar = TRUE
+
+
+
 #' @export
 SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRUE, test = NULL, progress.bar = TRUE, agg = 1)
 {
@@ -48,10 +58,13 @@ SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRU
   colClasses <- rep("NULL", length(header))
   colClasses[choice] <- "numeric"
 
-  #get the Linke turbidity for the station
   if(length(unique(substr(files, 1, 3))) != 1)
     stop("Please process one location at a time")
 
+  if(length(unique(substr(files, 4, 5))) != 1)
+    stop("Please process one year at a time")
+
+  #get the Linke turbidity for the station
   utils::data("SURFRAD.loc")
   stn <- substr(files[1], 1, 3)
   stn <- match(stn, SURFRAD.loc$stn)
@@ -62,10 +75,12 @@ SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRU
     pb <- utils::txtProgressBar(min = 0, max = length(files), style = 3)
   for(i in 1:length(files))
   {
+    #get year and raw data resolution
     date <- strptime(x = substr(files[i], 4, nchar(files[i])-4), format = "%y%j", tz = "UTC") # convert file name to date
     yr <- date$year+1900 # year
     mon <- lubridate::month(date) # month
     res <- ifelse(yr >=2009, 1, 3) # data resolution, 1 min if yr>2009, 3 min otherwise
+
     # read data
     tmp <- read.table(files[i], header = FALSE, skip = 2, colClasses = colClasses)
     names(tmp) <- header[choice]
@@ -146,12 +161,14 @@ SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRU
   diffs <- as.numeric(data_all$Time[2:nrow(data_all)]-data_all$Time[1:(nrow(data_all)-1)])
 
   #aggregate
-  if(max(diffs) == 3 & agg < 3)
+  if(min(diffs) == 3 & agg < 3)
   {
     stop("you have 3-min data, 'agg' must be at least 3\n")
-  }else if(max(diffs) == 3 & min(diffs) == 3 & agg == 3){
+  }else if(min(diffs) == 3 & agg == 3){
     cat("you have 3-min data, no aggregation required\n")
-  }else if(agg>1){
+  }else if(min(diffs) == 1 & agg == 1){
+    cat("you have 1-min data, no aggregation required\n")
+  }else if(agg>res){
     cat("Aggregating files ...\n")
     data_all <- data_all %>%
       mutate(., Time = ceiling.time(data_all$Time, agg*60))
