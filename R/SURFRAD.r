@@ -157,7 +157,7 @@ SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRU
     non.empty.interval <- match(unique(data_all$Time[-which(is.na(data_all$dw_solar))]), unique(data_all$Time))
     n.point.in.each.interval[non.empty.interval] <- rle(as.numeric(data_all$Time[-which(is.na(data_all$dw_solar))]))$length
     #assign NAs, so that when aggregate, these intervals will be NA-valued.
-    bad.interval <- unique(data_all$Time)[which(n.point.in.each.interval < round(agg/2))][-1]
+    bad.interval <- unique(data_all$Time)[which(n.point.in.each.interval < floor(agg/2))][-1]
     remove <- which(data_all$Time %in% bad.interval)
     data_all[remove, c(3:5)] <- NA
     data_all <- data_all %>%
