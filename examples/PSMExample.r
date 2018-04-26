@@ -39,7 +39,7 @@ i <- 1; data <- list(); #initialize for the loop
 for(yr in 2015:2016)
 {
   # !!! REMEMBER to adjust the funcition parameters
-  PSM.get(lon = loc$lon, lat = loc$lat, api_key = "YourAPIKey", attributes = "ghi,clearsky_ghi", name = "John+Smith", affiliation = "Some+Institute", year = as.character(yr), leap_year = "true", interval = "30", utc = "true", reason_for_use = "research", email = "email@gmail.com", mailing_list = "false", directory = dir_PSM)
+  PSM.get(lon = loc$lon, lat = loc$lat, api.key = "YourAPIKey", attributes = "ghi,clearsky_ghi", name = "John+Smith", affiliation = "Some+Institute", year = as.character(yr), leap.year = "true", interval = "30", utc = "true", reason.for.use = "research", email = "email@gmail.com", mailing.list = "false", directory = dir_PSM)
 
   # read PSM data
   tmp <- read.csv(paste0("36.62373_-116.01947_", yr, ".csv"), header = TRUE, skip = 2)

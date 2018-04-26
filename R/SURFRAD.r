@@ -5,7 +5,7 @@
 
 
 #' @export
-SURFRAD.get <- function(station, year, day_of_year, directory = "data-raw")
+SURFRAD.get <- function(station, year, day.of.year, directory = "data-raw")
 {
   if(nchar(station) == 3)
     station <- switch(tolower(station), bon={"Bondville_IL"}, tbl={"Boulder_CO"}, dra ={"Desert_Rock_NV"}, fpk = {"Fort_Peck_MT"}, gwn = {"Goodwin_Creek_MS"}, psu = {"Penn_State_PA"}, sxf = {"Sioux_Falls_SD"})
@@ -18,9 +18,9 @@ SURFRAD.get <- function(station, year, day_of_year, directory = "data-raw")
   if(!file.exists(directory))
     dir.create(directory)
 
-  for(i in 1:length(day_of_year))
+  for(i in 1:length(day.of.year))
   {
-    file <- paste(station.abb, substr(year, 3, 4), sprintf("%03.f", day_of_year[i]), ".dat", sep = "")
+    file <- paste(station.abb, substr(year, 3, 4), sprintf("%03.f", day.of.year[i]), ".dat", sep = "")
     dest <- paste(directory, file, sep = "/")
     URL <- paste("ftp://aftp.cmdl.noaa.gov/data/radiation/surfrad", station, year, file, sep = "/")
     utils::download.file(URL, destfile = dest)
@@ -144,10 +144,13 @@ SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRU
 
   #time difference
   diffs <- as.numeric(data_all$Time[2:nrow(data_all)]-data_all$Time[1:(nrow(data_all)-1)])
+
   #aggregate
   if(max(diffs) == 3 & agg < 3)
   {
-    stop("you have 3-min data, 'agg' must be at least 3")
+    stop("you have 3-min data, 'agg' must be at least 3\n")
+  }else if(max(diffs) == 3 & min(diffs) == 3 & agg == 3){
+    cat("you have 3-min data, no aggregation required\n")
   }else if(agg>1){
     cat("Aggregating files ...\n")
     data_all <- data_all %>%
