@@ -8,13 +8,13 @@ Get NOAA SURFRAD data
 Download NOAA Surface Radiation (SURFRAD) data in .dat format.
 }
 \usage{
-SURFRAD.get(station, year, day_of_year, directory = "data-raw")
+SURFRAD.get(station, year, day.of.year, directory = "data-raw")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{station}{a character string indicating the station name, options are "\code{Bondville_IL}", "\code{Boulder_CO}", "\code{Desert_Rock_NV}", "\code{Fort_Peck_MT}", "\code{Goodwin_Creek_MS}", "\code{Penn_State_PA}", "\code{Sioux_Falls_SD}". Alternatively, abbreviations of the stations can be used, i.e., "\code{bon}", "\code{tbl}", "\code{dra}", "\code{fpk}", "\code{gwn}", "\code{psu}", "\code{sxf}", respectively}
   \item{year}{a character string indicating the four-digit year}
-  \item{day_of_year}{days of year to be downloaded, as a numeric array}
+  \item{day.of.year}{days of year to be downloaded, as a numeric array}
   \item{directory}{the directory for the downloads, default to "\code{~/data-raw}"}
 }
 \details{
