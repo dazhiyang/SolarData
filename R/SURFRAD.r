@@ -131,7 +131,7 @@ SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRU
     if(use.qc)
     {
       if(is.null(test))
-        stop("You must specify the test(s), avialable ones include 'phy', 'ext', 'closr', 'dr', 'clim', 'all.")
+        stop("You must specify the test(s), avialable ones include 'phy', 'ext', 'closr', 'dr', 'clim', 'all'.")
       tmp <- QC.Basic(tmp, test)
       # new variable: sum of all irradiance qc values
       tmp <- tmp %>%
@@ -174,12 +174,15 @@ SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRU
       mutate(., Time = ceiling.time(data_all$Time, agg*60))
     #check number of points in each aggregation interval
     n.point.in.each.interval <- array(0, length(unique(data_all$Time)))
-    non.empty.interval <- match(unique(data_all$Time[-which(is.na(data_all$dw_solar))]), unique(data_all$Time))
-    n.point.in.each.interval[non.empty.interval] <- rle(as.numeric(data_all$Time[-which(is.na(data_all$dw_solar))]))$length
-    #assign NAs, so that when aggregate, these intervals will be NA-valued.
-    bad.interval <- unique(data_all$Time)[which(n.point.in.each.interval < floor(agg/2))][-1]
-    remove <- which(data_all$Time %in% bad.interval)
-    data_all[remove, c(3:5)] <- NA
+    if(length(which(is.na(data_all$dw_solar)))!=0)
+    {
+      non.empty.interval <- match(unique(data_all$Time[-which(is.na(data_all$dw_solar))]), unique(data_all$Time))
+      n.point.in.each.interval[non.empty.interval] <- rle(as.numeric(data_all$Time[-which(is.na(data_all$dw_solar))]))$length
+      #assign NAs, so that when aggregate, these intervals will be NA-valued.
+      bad.interval <- unique(data_all$Time)[which(n.point.in.each.interval < floor(agg/2))][-1]
+      remove <- which(data_all$Time %in% bad.interval)
+      data_all[remove, c(3:5)] <- NA
+    }
     data_all <- data_all %>%
       group_by(Time) %>%
       summarise_all(funs(mean), args = list(na.rm = TRUE))
