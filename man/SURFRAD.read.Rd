@@ -9,7 +9,7 @@ This function reads and concatenates the daily SURFRAD files.
 }
 \usage{
 SURFRAD.read(files, directory, use.original.qc = FALSE, use.qc = TRUE,
-             test = NULL, progress.bar = TRUE, agg = 1)
+             test = NULL, progress.bar = TRUE, agg = 1, additional.variables = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -20,6 +20,7 @@ SURFRAD.read(files, directory, use.original.qc = FALSE, use.qc = TRUE,
   \item{test}{vector of character strings, indicating which QC tests are used. Options include "phy", "ext", "closr", "df", "clim", and "all".}
   \item{progress.bar}{boolean, indicating whether the progress bar should be used}
   \item{agg}{numeric, aggregation interval in minute}
+  \item{additional.variables}{four compulsory variables are included, namely, "dw_solar", "direct_n", "diffuse", and "pressure". This function parameter allows the user to set additional variables for extraction, such as "temp" or "windspd". See the code for the available variable list.}
 }
 \details{
 It is not recommended to put all files in a same folder. The SURFRAD FTP folder directory is good, keep that, and use a loop (outside of this function) to access all folders.
