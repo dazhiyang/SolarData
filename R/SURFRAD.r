@@ -39,9 +39,8 @@ SURFRAD.get <- function(station, year, day.of.year, directory = "data-raw")
 # progress.bar = TRUE
 
 
-
 #' @export
-SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRUE, test = NULL, progress.bar = TRUE, agg = 1)
+SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRUE, test = NULL, progress.bar = TRUE, agg = 1, additional.variables = NULL)
 {
   setwd(directory)
 
@@ -52,8 +51,11 @@ SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRU
              "uw_ir","qc_uwir","uw_casetemp","qc_uwcasetemp","uw_dometemp","qc_uwdometemp",
              "uvb","qc_uvb","par","qc_par","netsolar","qc_netsolar","netir","qc_netir","totalnet","qc_totalnet",
              "temp","qc_temp","rh","qc_rh","windspd","qc_windspd","winddir","qc_winddir","pressure","qc_pressure")
-  variables <- c("dw_solar","direct_n","diffuse","pressure")
+
+  variables <- c("dw_solar","direct_n","diffuse","pressure", additional.variables)
   choice <- match(variables, header)
+   if(length(which(is.na(choice)))!=0)
+    stop("Names in 'additional.variable' are defined incorrectly")
   choice <- sort(c(1:8, choice, choice+1))
   colClasses <- rep("NULL", length(header))
   colClasses[choice] <- "numeric"
@@ -159,6 +161,21 @@ SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRU
 
   #time difference
   diffs <- as.numeric(data_all$Time[2:nrow(data_all)]-data_all$Time[1:(nrow(data_all)-1)])
+
+  #get serially complete data
+  start <- data_all$Time[1]
+  end <- data_all$Time[nrow(data_all)]
+  Time_all <- data_frame(Time = seq(start, end, by = 60*res))
+  if(length(Time_all) != nrow(data_all))
+  {
+    data_all <- data_all %>%
+      right_join(., Time_all, by = "Time")
+    missing <- which(is.na(data_all$zen))
+    solpos <- calZen(Tm = data_all$Time[missing] - res*30, lat = SURFRAD.loc$lat[stn], lon = SURFRAD.loc$lon[stn], tz = 0, LT[mon], alt = SURFRAD.loc$elev[stn])
+    data_all$Ics[missing] <- solpos$Ics
+    data_all$Ioh[missing] <- solpos$Ioh
+    data_all$zen[missing] <- solpos$zen
+  }
 
   #aggregate
   if(min(diffs) == 3 & agg < 3)
