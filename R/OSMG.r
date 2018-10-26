@@ -51,7 +51,7 @@ calZen <- function(Tm, lat, lon, tz = 0, LT, alt = 0)
   AM <- AM/101325*pressure #elevation corrected AM
   Ics <- cg1*Io*cos(radians(z))*exp(-cg2*AM*(fh1 + fh2*(LT-1)))*exp(0.01*pmin(AM,12)^1.8)
   Ics <- ifelse(zen>=90, 0, Ics)
-  Icsd <- (0.664+0.163/fh1)*Io*exp(-0.09*(LT-1)*AM)*cos(z)
+  Icsd <- (0.664+0.163/fh1)*Io*exp(-0.09*(LT-1)*AM)*cos(radians(z))
   Icsd <- ifelse(zen>=90, 0, Icsd)
 
   out = list(zen, Io, Ioh, Ics, Icsd, Tsolar)
