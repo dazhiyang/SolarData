@@ -7,7 +7,7 @@
 #' @importFrom grDevices hcl
 
 ## quiets concerns of R CMD check re: the .'s that appear in pipelines
-if(getRversion() >= "2.15.1")  utils::globalVariables(c(".", "Time", "SURFRAD.loc"))
+if(getRversion() >= "2.15.1")  utils::globalVariables(c(".", "Time", "SURFRAD.loc", "BSRN.loc"))
 
 #################################################################################
 # function to calculate sun position and extraterrestial irradiance

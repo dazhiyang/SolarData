@@ -6,7 +6,7 @@ There are many publicly available solar datasets. This package contains function
 - NOAA [Surface Radiation (SURFRAD)](https://www.esrl.noaa.gov/gmd/grad/surfrad/), long-term high-resolution ground-based irradiance data
 - NASA [Shuttle Radar Topography Mission (SRTM)](https://www2.jpl.nasa.gov/srtm/cbanddataproducts.html), digital elevation model data
 - SoDa [Linke Turbidity Factor (LTF)](http://www.soda-pro.com/help/general-knowledge/linke-turbidity-factor), Linke turbidity data
-
+- WRMC [Baseline Surface Radiation Network (BSRN)](https://bsrn.awi.de/), long-term high-resolution ground-based irradiance data
 
 ## Getting Started
 
@@ -38,7 +38,7 @@ install_github("dazhiyang/SolarData")
 
 ## Running the tests
 
-This code segment gives an example on how to run transposition modeling (horizontal to tilt) using a variety of models. (This is not up to date, I will update this section, as well as the package reference manual once the paper is accepted for publication)
+This code segment gives an example on how to run transposition modeling (horizontal to tilt) using a variety of models. (This is not up to date)
 
 ```
 library("SolarData")

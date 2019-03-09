@@ -10,7 +10,8 @@ Imports:
   geosphere,
   lubridate,
   grDevices,
-  tibble
+  tibble,
+  RCurl
 Authors@R: person("Dazhi", "Yang", email = "yangdazhi.nus@gmail.com", role = c("aut", "cre"))
 Description: Download and manipulate some publicly available solar datasets.
 Depends: 
