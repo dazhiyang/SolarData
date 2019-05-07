@@ -2,7 +2,7 @@
 #' @importFrom lubridate ymd_hm month
 #' @importFrom tibble as_tibble tibble
 #' @importFrom stats complete.cases
-#' @importFrom RCurl getURL
+#' @importFrom RCurl getURL getCurlHandle getBinaryURL
 
 
 #' @export
@@ -30,6 +30,24 @@ BSRN.list <- function(station, user, pwd)
 
   BSRNdir
 }
+
+#' @export
+BSRN.get <- function(station, mmyy, directory, user, pwd)
+{
+  if(is.null(directory))
+    directory <- getwd()
+
+  # build a list of URLs for requested files
+  files <- sapply(mmyy, function(x) paste0("ftp://ftp.bsrn.awi.de/", station, "/", station, x, ".dat.gz"), simplify = F)
+
+  # build a list of paths to save gotten files.
+  wdfiles <- sapply(mmyy, function(x) paste0(directory, "/", station, x, ".dat.gz"), simplify = F)
+
+  # request files using RCurl
+  con <-  RCurl::getCurlHandle(ftp.use.epsv = FALSE, userpwd= paste0(user, ":", pwd))
+  invisible(mapply(function(x,y) writeBin(RCurl::getBinaryURL(x, curl = con), y), x = files, y = wdfiles))
+}
+
 
 
 #' @export
