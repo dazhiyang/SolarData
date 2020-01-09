@@ -119,6 +119,8 @@ SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRU
     # fill other solar positioning parameters
     tmp <- tmp %>%
       mutate(Ics = solpos$Ics) %>%
+      mutate(Icsb = solpos$Icsb) %>%
+      mutate(Icsd = solpos$Icsd) %>%
       mutate(Ioh = solpos$Ioh) %>%
       mutate(Mu0 = ifelse(tmp$zen > 90, 0, cos(radians(tmp$zen)))) %>%
       mutate(Sa = solpos$Io)

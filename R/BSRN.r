@@ -109,6 +109,8 @@ BSRN.read <- function(file, directory, use.qc = TRUE, test = NULL, use.agg = FAL
   tmp <- tmp %>%
     mutate(zen = solpos$zenith) %>%
     mutate(Ics = solpos$Ics) %>%
+    mutate(Icsb = solpos$Icsb) %>%
+    mutate(Icsd = solpos$Icsd) %>%
     mutate(Ioh = solpos$Ioh)
   tmp <- tmp %>%
     mutate(Mu0 = ifelse(tmp$zen > 90, 0, cos(radians(tmp$zen)))) %>%

@@ -46,18 +46,29 @@ calZen <- function(Tm, lat, lon, tz = 0, LT, alt = 0)
   cg1 <- (0.0000509*alt + 0.868)
   cg2 <- (0.0000392*alt + 0.0387)
   z <- pmin(zen, 90)
-  #M <- 1/(cos(radians(z))+0.50572*(96.07995 - z)^(-1.6364))
+  #AM <- 1/(cos(radians(z))+0.50572*(96.07995 - z)^(-1.6364))
+  #AM <- 1/(cos(radians(z))+0.15*((93.885 - z)^(-1.253)))
   AM <- 1/(cos(radians(z))+0.00176759*(z)*((94.37515 - z)^(-1.21563)))
   AM <- AM/101325*pressure #elevation corrected AM
 
-  # Ineichen-Perez clear-sky ghi, with Perez enhancement
+  # Ineichen-Perez clear-sky global horizontal irradiance (GHI), with Perez enhancement
   Ics <- cg1*Io*cos(radians(z))*exp(-cg2*AM*(fh1 + fh2*(LT-1)))*exp(0.01*pmin(AM,12)^1.8)
   Ics <- ifelse(zen>=90, 0, Ics)
-  Icsd <- (0.664+0.163/fh1)*Io*exp(-0.09*(LT-1)*AM)*cos(radians(z))
-  Icsd <- ifelse(zen>=90, 0, Icsd)
 
-  out = list(zen, Io, Ioh, Ics, Icsd, Tsolar)
-  names(out) = c("zenith", "Io", "Ioh", "Ics", "Icsd", "Tsolar")
+  # Ineichen-Perez clear-sky beam noral irradiance (BNI)
+  Icsb1 <- (0.664+0.163/fh1)*Io*exp(-0.09*(LT-1)*AM)*cos(radians(z))
+  Icsb1 <- pmax(0, Icsb1)
+  # "empirical correction" SE 73, 157 & SE 73, 312.
+  Icsb2 <- (1 - (0.1 - 0.2*exp(-LT))/(0.1 + 0.882/fh1)) / cos(radians(z))
+  Icsb2 <- Ics * pmin(pmax(Icsb2, 0), 1e20)
+  Icsb <- pmin(Icsb1, Icsb2)
+
+  # Ineichen-Perez clear-sky diffuse horizontal irradiance (DHI)
+  Icsd <- Ics - Icsb*cos(radians(z))
+  Icsd <- pmax(0, Icsd)
+
+  out = list(zen, Io, Ioh, Ics, Icsb, Icsd, Tsolar)
+  names(out) = c("zenith", "Io", "Ioh", "Ics", "Icsb", "Icsd", "Tsolar")
   out
 }
 
