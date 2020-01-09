@@ -49,6 +49,8 @@ calZen <- function(Tm, lat, lon, tz = 0, LT, alt = 0)
   #M <- 1/(cos(radians(z))+0.50572*(96.07995 - z)^(-1.6364))
   AM <- 1/(cos(radians(z))+0.00176759*(z)*((94.37515 - z)^(-1.21563)))
   AM <- AM/101325*pressure #elevation corrected AM
+
+  # Ineichen-Perez clear-sky ghi, with Perez enhancement
   Ics <- cg1*Io*cos(radians(z))*exp(-cg2*AM*(fh1 + fh2*(LT-1)))*exp(0.01*pmin(AM,12)^1.8)
   Ics <- ifelse(zen>=90, 0, Ics)
   Icsd <- (0.664+0.163/fh1)*Io*exp(-0.09*(LT-1)*AM)*cos(radians(z))
