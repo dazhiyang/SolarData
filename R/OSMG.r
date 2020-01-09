@@ -56,7 +56,7 @@ calZen <- function(Tm, lat, lon, tz = 0, LT, alt = 0)
   Ics <- ifelse(zen>=90, 0, Ics)
 
   # Ineichen-Perez clear-sky beam noral irradiance (BNI)
-  Icsb1 <- (0.664+0.163/fh1)*Io*exp(-0.09*(LT-1)*AM)*cos(radians(z))
+  Icsb1 <- (0.664+0.163/fh1)*Io*exp(-0.09*(LT-1)*AM)
   Icsb1 <- pmax(0, Icsb1)
   # "empirical correction" SE 73, 157 & SE 73, 312.
   Icsb2 <- (1 - (0.1 - 0.2*exp(-LT))/(0.1 + 0.882/fh1)) / cos(radians(z))
