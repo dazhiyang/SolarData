@@ -14,16 +14,17 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c(".", "Time", "SURFRAD.lo
 #################################################################################
 calZen <- function(Tm, lat, lon, tz = 0, LT, alt = 0)
 {
-  jd = JD(Tm)
-  sunv = sunvector(jd, lat, lon, tz)
-  azi = round(sunpos(sunv)[,1],3)#azimuth of the sun
-  zen = round(sunpos(sunv)[,2],3)#zenith angle
+  jd <- JD(Tm)
+  sunv <- sunvector(jd, lat, lon, tz)
+  azi <- round(sunpos(sunv)[,1],3)#azimuth of the sun
+  zen <- round(sunpos(sunv)[,2],3)#zenith angle
   #surface.norm = normalvector(tilt, orientation)
   #inc = round(as.numeric(degrees(acos(sunv%*% as.vector(surface.norm)))),3)
-  dec = declination(jd)*pi/180
-  re = 1.000110+0.034221*cos(dec)+0.001280*sin(dec)+0.00719*cos(2*dec)+0.000077*sin(2*dec)
-  Io = round(1362*re,3)#extraterrestrial direct normal irradiance
-  Ioh = round(1362*re*cos(radians(zen)))#horizontal extraterrestrial irradiance
+  doy <- daydoy(Tm)
+  da <- (2 * pi / 365) * (doy - 1)
+  re = 1.000110+0.034221*cos(da)+0.001280*sin(da)+0.00719*cos(2*da)+0.000077*sin(2*da)
+  Io = round(1361.1*re,3)#extraterrestrial direct normal irradiance
+  Ioh = round(1361.1*re*cos(radians(zen)))#horizontal extraterrestrial irradiance
   Ioh <- ifelse(zen>=90, 0, Ioh)
 
   # Equation of time (L. O. Lamm, 1981, Solar Energy 26, p465)
@@ -37,19 +38,19 @@ calZen <- function(Tm, lat, lon, tz = 0, LT, alt = 0)
   EOT <- rowSums(sapply(1:6, function(i) coef[i,2]*cos(2*pi*coef[i,1]*dn/365.25) + coef[i,3]*sin(2*pi*coef[i,1]*dn/365.25)))*60 #EOT in minutes
   Tsolar <- Tm - 4*60*(tz*15-lon) + EOT*60
 
-  #find pressure from altitude
-  pressure = 100 * ((44331.514 - alt)/11880.516)^(1/0.1902632)
+  #find pressure from altitude, "A Quick Derivation relating altitude to air pressure" from Portland State Aerospace Society, Version 1.03, 12/22/2004.
+  pressure = 100 * ((44331.514 - alt)/11880.516)^(1/0.1902632) # pressure in pascal
 
   #Perez-Ineichen clear sky model (Ineichen and Perez, 2002), monthly Linke turbidity can be obtained from SoDa service (following: Gueymard and Ruiz-Aries, 2015)
   fh1 <- exp(-alt/8000)
   fh2 <- exp(-alt/1250)
-  cg1 <- (0.0000509*alt + 0.868)
-  cg2 <- (0.0000392*alt + 0.0387)
+  cg1 <- (5.09e-05*alt + 0.868)
+  cg2 <- (3.92e-05*alt + 0.0387)
   z <- pmin(zen, 90)
   #AM <- 1/(cos(radians(z))+0.50572*(96.07995 - z)^(-1.6364)) # several different versions of AM
   #AM <- 1/(cos(radians(z))+0.15*((93.885 - z)^(-1.253)))
   AM <- 1/(cos(radians(z))+0.00176759*(z)*((94.37515 - z)^(-1.21563)))
-  AM <- AM/101325*pressure #elevation corrected AM
+  AM <- AM/101325*pressure #elevation corrected AM, absolute airmass
 
   # Ineichen-Perez clear-sky global horizontal irradiance (GHI), with Perez enhancement
   Ics <- cg1*Io*cos(radians(z))*exp(-cg2*AM*(fh1 + fh2*(LT-1)))*exp(0.01*pmin(AM,12)^1.8)
