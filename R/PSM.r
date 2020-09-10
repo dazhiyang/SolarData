@@ -6,8 +6,13 @@ PSM.get <- function(lon, lat, api.key, attributes, name, affiliation, year, leap
   if(length(lat)!=length(lon))
     stop("'lon' and 'lat' must have the same length")
 
+  year <- as.character(year)
   if(nchar(year)>4)
     stop("NSRDB API only allows downloading one year at a time")
+
+  interval <- as.character(interval)
+  if(interval %in% c("5", "15") & !(year %in% c("2018", "2019")))
+    stop("For 5-min data, only years 2018 and 2019 are available at the moment")
 
   if(!file.exists(directory))
     dir.create(directory)
@@ -15,7 +20,13 @@ PSM.get <- function(lon, lat, api.key, attributes, name, affiliation, year, leap
   for(i in 1:length(lat))
   {
     # Declare url string
-    URL <- paste0('http://developer.nrel.gov/api/solar/nsrdb_psm3_download.csv?wkt=POINT(', lon[i], '+', lat[i], ')&names=', year, '&leap_day=', leap.year, '&interval=', interval, '&utc=', utc, '&full_name=', name, '&email=', email, '&affiliation=', affiliation, '&mailing_list=', mailing.list, '&reason=', reason.for.use, '&api_key=', api.key, '&attributes=', attributes)
+    if(interval %in% c("5", "15"))
+    {
+      URL <- paste0('https://developer.nrel.gov/api/nsrdb/v2/solar/psm3-5min-download.csv?wkt=POINT(', lon[i], '+', lat[i], ')&names=', year, '&leap_day=', leap.year, '&interval=', interval, '&utc=', utc, '&full_name=', name, '&email=', email, '&affiliation=', affiliation, '&mailing_list=', mailing.list, '&reason=', reason.for.use, '&api_key=', api.key, '&attributes=', attributes)
+    }else{
+      URL <- paste0('https://developer.nrel.gov/api/nsrdb/v2/solar/psm3-download.csv?wkt=POINT(', lon[i], '+', lat[i], ')&names=', year, '&leap_day=', leap.year, '&interval=', interval, '&utc=', utc, '&full_name=', name, '&email=', email, '&affiliation=', affiliation, '&mailing_list=', mailing.list, '&reason=', reason.for.use, '&api_key=', api.key, '&attributes=', attributes)
+    }
+
     # name the output file
     output_file <- paste0(lat[i], "_", lon[i], "_", year, ".csv")
     # API request and saving
@@ -24,8 +35,6 @@ PSM.get <- function(lon, lat, api.key, attributes, name, affiliation, year, leap
   }
 
 }
-
-
 
 # pack <- "SolarData"
 # path <- find.package(pack)
