@@ -167,7 +167,7 @@ SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRU
   #get serially complete data
   start <- data_all$Time[1]
   end <- data_all$Time[nrow(data_all)]
-  Time_all <- data_frame(Time = seq(start, end, by = 60*res))
+  Time_all <- tibble(Time = seq(start, end, by = 60*res))
   if(nrow(Time_all) != nrow(data_all))
   {
     data_all <- data_all %>%
