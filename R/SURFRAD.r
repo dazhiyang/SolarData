@@ -204,7 +204,8 @@ SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRU
     }
     data_all <- data_all %>%
       group_by(Time) %>%
-      summarise_all(funs(mean), args = list(na.rm = TRUE))
+      summarise_all(.funs = mean, na.rm = TRUE)
+      #summarise_all(funs(mean), args = list(na.rm = TRUE))
   }
 
   # output
@@ -236,7 +237,7 @@ QC.Basic <- function(df, test)
   if("closr" %in% test | "all" %in% test)
   {
     df <- df %>%
-      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen < 75 & abs((df$sum-df$dw_solar)/df$dw_solar)*100 > 8 , 1, 0))
+      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen < 75 & abs((df$sum-df$dw_solar)/df$dw_solar)*100 > 8, 1, 0))
     df <- df %>%
       mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen > 75 & df$zen < 93 & abs((df$sum-df$dw_solar)/df$dw_solar)*100 > 15, 1, df$qc_closr))
   }

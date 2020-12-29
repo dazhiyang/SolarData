@@ -169,7 +169,7 @@ BSRN.read <- function(file, directory, use.qc = TRUE, test = NULL, use.agg = FAL
       }
       data_all <- data_all %>%
         group_by(Time) %>%
-        summarise_all(funs(mean), args = list(na.rm = TRUE))
+        summarise_all(.funs = mean, na.rm = TRUE)
     }
   }
 
@@ -216,8 +216,10 @@ QC.Basic.v2 <- function(df, test)
       mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen < 75 & abs((df$sum-df$dw_solar)/df$dw_solar)*100 > 8 , 1, 0))
     df <- df %>%
       mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen > 75 & df$zen < 93 & abs((df$sum-df$dw_solar)/df$dw_solar)*100 > 15, 1, df$qc_closr))
-    df <- df %>%
-      mutate(qc_closr = ifelse(is.na(df$dw_solar) | is.na(df$sum), as.numeric(NA), df$qc_closr))
+    # the question is: if the test is indeterministic, should we remove the data point
+    # If the answer is "yes", then uncomment the line below, otherwise, comment the line below
+    # df <- df %>%
+    #   mutate(qc_closr = ifelse(is.na(df$dw_solar) | is.na(df$sum), as.numeric(NA), df$qc_closr))
 
     df <- df %>%
       mutate_at(.vars = c("dw_solar", "direct_n", "diffuse"), function(x) ifelse(df$qc_closr == 1 | is.na(df$qc_closr), as.numeric(NA), x)) %>%
