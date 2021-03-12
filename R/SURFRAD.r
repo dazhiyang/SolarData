@@ -221,7 +221,7 @@ QC.Basic <- function(df, test)
     df <- df %>%
       mutate(qc_phy_G = ifelse(df$dw_solar > df$Sa*1.5*(df$Mu0)^1.2 + 100 | df$dw_solar < -4, 1, 0)) %>%
       mutate(qc_phy_D = ifelse(df$diffuse > df$Sa*0.95*(df$Mu0)^1.2 + 50 | df$diffuse < -4, 1, 0)) %>%
-      mutate(qc_phy_I = ifelse(df$direct_n*df$Mu0 > df$Sa*df$Mu0 | df$direct_n*df$Mu0 < -4, 1, 0))
+      mutate(qc_phy_I = ifelse(df$direct_n > df$Sa | df$direct_n < -4, 1, 0))
   }
 
   #check extreme-rare limit and flag
@@ -230,16 +230,16 @@ QC.Basic <- function(df, test)
     df <- df %>%
       mutate(qc_ext_G = ifelse(df$dw_solar > df$Sa*1.2*(df$Mu0)^1.2 + 50 | df$dw_solar < -2, 1, 0)) %>%
       mutate(qc_ext_D = ifelse(df$diffuse > df$Sa*0.75*(df$Mu0)^1.2 + 30 | df$diffuse < -2, 1, 0)) %>%
-      mutate(qc_ext_I = ifelse(df$direct_n*df$Mu0 > df$Sa*0.95*(df$Mu0)^1.2 + 10 | df$direct_n*df$Mu0 < -2, 1, 0))
+      mutate(qc_ext_I = ifelse(df$direct_n > df$Sa*0.95*(df$Mu0)^0.2 + 10 | df$direct_n < -2, 1, 0))
   }
 
   #check closure
   if("closr" %in% test | "all" %in% test)
   {
     df <- df %>%
-      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen < 75 & abs((df$sum-df$dw_solar)/df$dw_solar)*100 > 8, 1, 0))
+      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen < 75 & abs(df$dw_solar/df$sum-1) > 0.08, 1, 0))
     df <- df %>%
-      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen > 75 & df$zen < 93 & abs((df$sum-df$dw_solar)/df$dw_solar)*100 > 15, 1, df$qc_closr))
+      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen > 75 & df$zen < 93 & abs(df$dw_solar/df$sum-1) > 0.15, 1, df$qc_closr))
   }
 
   #check diffuse ratio
