@@ -200,7 +200,7 @@ QC.Basic.v2 <- function(df, test)
     df <- df %>%
       mutate(qc_ext_G = ifelse(df$dw_solar > df$Sa*1.2*(df$Mu0)^1.2 + 50 | df$dw_solar < -2, 1, 0)) %>%
       mutate(qc_ext_D = ifelse(df$diffuse > df$Sa*0.75*(df$Mu0)^1.2 + 30 | df$diffuse < -2, 1, 0)) %>%
-      mutate(qc_ext_I = ifelse(df$direct_n*df$Mu0 > df$Sa*0.95*(df$Mu0)^1.2 + 10 | df$direct_n*df$Mu0 < -2, 1, 0))
+      mutate(qc_ext_I = ifelse(df$direct_n*df$Mu0 > df$Sa*0.95*(df$Mu0)^0.2 + 10 | df$direct_n*df$Mu0 < -2, 1, 0))
 
     df <- df %>%
       mutate(dw_solar = ifelse(df$qc_ext_G == 1 | is.na(df$qc_ext_G), as.numeric(NA), df$dw_solar)) %>%

@@ -139,10 +139,10 @@ SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRU
       tmp <- QC.Basic(tmp, test)
       # new variable: sum of all irradiance qc values
       tmp <- tmp %>%
-        mutate(qc_all = tmp %>% dplyr::select(starts_with("qc")) %>% rowSums(.))
+        mutate(qc_all = tmp %>% dplyr::select(starts_with("qc")) %>% rowSums(., na.rm = TRUE))
       # set NA at the non-zero qc rows, and rm all qc columns
       tmp <- tmp %>%
-        mutate_at(.vars = c(3:5), funs(ifelse(tmp$qc_all>0, NA, .))) %>%
+        mutate_at(.vars = c(3:5), funs(ifelse(tmp$qc_all>0 | !is.na(tmp$qc_all), NA, .))) %>%
         dplyr::select(-starts_with("qc"))
     }
 
@@ -237,9 +237,9 @@ QC.Basic <- function(df, test)
   if("closr" %in% test | "all" %in% test)
   {
     df <- df %>%
-      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen < 75 & abs(df$dw_solar/df$sum-1) > 0.08, 1, 0))
+      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen < 75 & abs((df$sum-df$dw_solar)/df$dw_solar)*100 > 8 , 1, 0))
     df <- df %>%
-      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen > 75 & df$zen < 93 & abs(df$dw_solar/df$sum-1) > 0.15, 1, df$qc_closr))
+      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen > 75 & df$zen < 93 & abs((df$sum-df$dw_solar)/df$dw_solar)*100 > 15, 1, df$qc_closr))
   }
 
   #check diffuse ratio
