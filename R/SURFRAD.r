@@ -142,7 +142,7 @@ SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRU
         mutate(qc_all = tmp %>% dplyr::select(starts_with("qc")) %>% rowSums(., na.rm = TRUE))
       # set NA at the non-zero qc rows, and rm all qc columns
       tmp <- tmp %>%
-        mutate_at(.vars = c(3:5), funs(ifelse(tmp$qc_all>0 | !is.na(tmp$qc_all), NA, .))) %>%
+        mutate_at(.vars = c(3:5), funs(ifelse(tmp$qc_all>0 & !is.na(tmp$qc_all), NA, .))) %>%
         dplyr::select(-starts_with("qc"))
     }
 
@@ -202,9 +202,9 @@ SURFRAD.read <- function(files, directory, use.original.qc = FALSE, use.qc = TRU
       remove <- which(data_all$Time %in% bad.interval)
       data_all[remove, c(3:5)] <- NA
     }
-    data_all <- data_all %>%
+    data_all2 <- data_all %>%
       group_by(Time) %>%
-      summarise_all(.funs = mean, na.rm = TRUE)
+      summarise_all(., .funs = mean, na.rm = TRUE)
       #summarise_all(funs(mean), args = list(na.rm = TRUE))
   }
 
