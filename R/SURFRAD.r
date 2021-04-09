@@ -237,9 +237,9 @@ QC.Basic <- function(df, test)
   if("closr" %in% test | "all" %in% test)
   {
     df <- df %>%
-      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen < 75 & abs((df$sum-df$dw_solar)/df$dw_solar)*100 > 8 , 1, 0))
+      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen < 75 & abs((df$sum-df$dw_solar)/df$sum)*100 > 8 , 1, 0))
     df <- df %>%
-      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen > 75 & df$zen < 93 & abs((df$sum-df$dw_solar)/df$dw_solar)*100 > 15, 1, df$qc_closr))
+      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen > 75 & df$zen < 93 & abs((df$sum-df$dw_solar)/df$sum)*100 > 15, 1, df$qc_closr))
   }
 
   #check diffuse ratio
