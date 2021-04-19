@@ -213,9 +213,9 @@ QC.Basic.v2 <- function(df, test)
   if("closr" %in% test | "all" %in% test)
   {
     df <- df %>%
-      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen < 75 & abs((df$sum-df$dw_solar)/df$dw_solar)*100 > 8 , 1, 0))
+      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen < 75 & abs((df$sum-df$dw_solar)/df$sum)*100 > 8 , 1, 0))
     df <- df %>%
-      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen > 75 & df$zen < 93 & abs((df$sum-df$dw_solar)/df$dw_solar)*100 > 15, 1, df$qc_closr))
+      mutate(qc_closr = ifelse(df$dw_solar > 50 & df$zen > 75 & df$zen < 93 & abs((df$sum-df$dw_solar)/df$sum)*100 > 15, 1, df$qc_closr))
     # the question is: if the test is indeterministic, should we remove the data point
     # If the answer is "yes", then uncomment the line below, otherwise, comment the line below
     # df <- df %>%
